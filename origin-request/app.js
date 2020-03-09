@@ -8,13 +8,14 @@ const getBucket = (owner, repository, branch = null) => new Promise((resolve, re
     reject("owner and reposiotory not found");
   }
   const params = {
-    TableName: "federalist-proxy",
-    KeyConditionExpression: "#ownerRepo = :ownerRepo",
+    // TableName: "federalist-proxy",
+    TableName: "federalist-proxy-dev",
+    KeyConditionExpression: "#owner_repository = :owner_repository",
     ExpressionAttributeNames:{
-     "#ownerRepo": "ownerRepo"
+     "#owner_repository": "owner_repository"
     },
     ExpressionAttributeValues: {
-     ":ownerRepo": `${[owner, repository].join('/')}`
+     ":owner_repository": `${[owner, repository].join('/')}`
     }
   };
   console.log(`\nfed-proxy params:\t${JSON.stringify(params)}\n`);
@@ -30,13 +31,15 @@ const getBucket = (owner, repository, branch = null) => new Promise((resolve, re
             resolve(settings['bucket_name']);
         });
       } else {
+        console.log(`\nQuery succeeded: no results found\n`);
         resolve();
       }
     }
   });
 });
  
-exports.handler = (event, context, callback) => {
+exports.lambdaHandler = (event, context, callback) => {
+    console.log(`event:\t${JSON.stringify(event)}`)
    const request = event.Records[0].cf.request;
 
    /**

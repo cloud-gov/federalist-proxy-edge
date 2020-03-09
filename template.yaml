@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  federalist-proxy
+
+  SAM Template for federalist-proxy
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  CustomOriginRoutingFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: fed-proxy-dev-origin-request
+      CodeUri: origin-request/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+      Events:
+        RequestOrigin:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /origin-request
+            Method: get
+      Policies: AmazonDynamoDBReadOnlyAccess
+
+  CloudFrontOriginAccessIdentity:
+    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: 'Serverless website OA'
+
+
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: "Cloudfront distribution for serverless website"
+        DefaultRootObject: "index.html"
+        Enabled: true
+        HttpVersion: http2
+        # List of origins that Cloudfront will connect to
+        Origins:
+          - Id: s3-website
+            DomainName: !GetAtt S3Bucket.DomainName
+            S3OriginConfig:
+              # Restricting Bucket access through an origin access identity
+              OriginAccessIdentity: 
+                Fn::Sub: 'origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}'
+        # To connect the CDN to the origins you need to specify behaviours
+        DefaultCacheBehavior:
+          # Compress resources automatically ( gzip )
+          Compress: 'true'
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: s3-website
+          ViewerProtocolPolicy : redirect-to-https
+          LambdaFunctionAssociations:
+            - 
+              EventType: origin-request
+              LambdaFunctionARN: !Ref CustomOriginRoutingFunction.Version
+          ForwardedValues:
+            QueryString: 'false'
+            Headers:
+              - "X-Frame-Options"
+              - host
+              - "x-forwarded-host"
+              - Authorization
+            Cookies:
+              Forward: none
+        Aliases:
+          - '*.sites-dev.federalist.18f.gov'
+        ViewerCertificate:
+          AcmCertificateArn: !Ref DomainCertificate
+          MinimumProtocolVersion: TLSv1.1_2016
+          SslSupportMethod: 'sni-only'
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+
+  DynamoSiteTable:
+    Type: AWS::Serverless::SimpleTable # if you want to define a more complex table, use AWS::DynamoDB::Table
+    Properties:
+      TableName: federalist-proxy-dev
+      PrimaryKey:
+        Name: owner_repository
+        Type: String
+      Tags:
+          AppType: Serverless
+
+  DomainCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties: 
+      DomainName: '*.sites-dev.federalist.18f.gov'
+      ValidationMethod: DNS
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  CustomOriginRoutingFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt CustomOriginRoutingFunction.Arn
