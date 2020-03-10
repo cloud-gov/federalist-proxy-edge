@@ -11,6 +11,22 @@ Globals:
     Timeout: 3
 
 Resources:
+  BasicAuthFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: fed-proxy-dev-basic-auth
+      CodeUri: viewer-request/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+      Events:
+        RequestOrigin:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /viewer-request
+            Method: get
+      Policies: AmazonDynamoDBReadOnlyAccess
+
   CustomOriginRoutingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -26,6 +42,21 @@ Resources:
             Path: /origin-request
             Method: get
       Policies: AmazonDynamoDBReadOnlyAccess
+
+  CustomHeadersFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: fed-proxy-dev-viewer-response
+      CodeUri: origin-response/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+      Events:
+        RequestOrigin:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /origin-response
+            Method: get
 
   CloudFrontOriginAccessIdentity:
     Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
@@ -66,6 +97,12 @@ Resources:
             - 
               EventType: origin-request
               LambdaFunctionARN: !Ref CustomOriginRoutingFunction.Version
+            - 
+              EventType: origin-response
+              LambdaFunctionARN: !Ref CustomHeadersFunction.Version
+            - 
+              EventType: viewer-request
+              LambdaFunctionARN: !Ref BasicAuthFunction.Version
           ForwardedValues:
             QueryString: 'false'
             Headers:
