@@ -1,12 +1,13 @@
 exports.lambdaHandler = async (event, context) => {
-	console.log(`\nevent:\t${JSON.stringify(event)}`);
+	console.log(`\nevent:\t${JSON.stringify(event)}\n`);
+	console.log(`\ncontext:\t${JSON.stringify(context)}\n`);
 
     const response = event.Records[0].cf.response;
     const headers = response.headers;
 
     headers['strict-transport-security'] = [{key: 'Strict-Transport-Security', value: 'max-age=31536001; preload'}];
     headers['X-Frame-Options'] = [{key: 'X-Frame-Options', value: 'SAMEORIGIN'}];
-
+    response.headers = headers;
     return response;
 };
 // custom error handling
