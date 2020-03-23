@@ -2,6 +2,7 @@ const { expect } = require('chai');
 const AWSMocks = require('./aws-mocks');
 
 const index = require('../app');
+const helpers = require('../helpers');
 
 const event = {
   "Records": [
@@ -49,16 +50,12 @@ const lambdaHandler = (_event, context = undefined) => new Promise((resolve, rej
 
 describe("The handler function", () => {
     it("returns a message", async () => {
-      const params = {
-        owner: 'testOwner',
-        repository: 'testRepo'
-      }
       results = {
         Count: 1,
         Items: [{ settings: { bucket_name: 'testBucket' }}],
       };
     
-      AWSMocks.mocks.DynamoDB.DocumentClient.query = (params, callback) => {
+      AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
         callback(null, results);
       };
 
