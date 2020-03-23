@@ -57,7 +57,8 @@ describe("The handler function", () => {
         Count: 1,
         Items: [{ settings: { bucket_name: 'testBucket' }}],
       };
-      AWSMocks.mocks.DynamoDB.query = (params, callback) => {
+    
+      AWSMocks.mocks.DynamoDB.DocumentClient.query = (params, callback) => {
         callback(null, results);
       };
 

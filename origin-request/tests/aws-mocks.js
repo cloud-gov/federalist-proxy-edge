@@ -1,31 +1,24 @@
 const AWS = require('aws-sdk');
 
 const mocks = {
-  DynamoDB: {},
+  DynamoDB: {
+    DocumentClient: {},
+  },
 };
 
-const mockableFunctions = {
-  DynamoDB: [
-    'query',
-  ],
+AWS.DynamoDB.DocumentClient = function mock() {};
+AWS.DynamoDB.DocumentClient.prototype.query = (params, cb) => {
+  if (mocks.DynamoDB.DocumentClient.query) {
+    mocks.DynamoDB.DocumentClient.query(params, cb);
+    return;
+  }
+  cb(null, {})
 };
-
-Object.keys(mockableFunctions).forEach((service) => {
-  AWS[service] = function mock() {};
-
-  mockableFunctions[service].forEach((functionName) => {
-    AWS[service].prototype[functionName] = (params, cb) => {
-      if (mocks[service][functionName]) {
-        mocks[service][functionName](params, cb);
-        return;
-      }
-      cb(null, {});
-    };
-  });
-});
 
 const resetMocks = () => {
-  mocks.DynamoDB = {};
+  mocks.DynamoDB = {
+    DocumentClient: {},
+  };
 };
 
 module.exports = { mocks, resetMocks };

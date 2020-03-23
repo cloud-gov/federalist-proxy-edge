@@ -1,7 +1,7 @@
 'use strict';
 const AWS = require("aws-sdk");
-const dynamodb = new AWS.DynamoDB();
-// const docClient = new AWS.DynamoDB.DocumentClient();
+// const dynamodb = new AWS.DynamoDB();
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 const getBucket = (owner, repository, branch = null) => new Promise((resolve, reject) => {
   if (!owner || !repository) {
@@ -19,7 +19,8 @@ const getBucket = (owner, repository, branch = null) => new Promise((resolve, re
     }
   };
   
-  dynamodb.query(params, function(err, data) {
+  // dynamodb.query(params, function(err, data) {
+  docClient.query(params, function(err, data) {
     if (err) {
       reject("Unable to query. Error:", JSON.stringify(err, null, 2));
     } else {
