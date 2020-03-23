@@ -15,8 +15,8 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       FunctionName: fed-proxy-dev-basic-auth
-      CodeUri: viewer-request/
-      Handler: app.lambdaHandler
+      CodeUri: requests/
+      Handler: viewer-request.lambdaHandler
       Runtime: nodejs12.x
       AutoPublishAlias: live
       Events:
@@ -31,8 +31,8 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       FunctionName: fed-proxy-dev-origin-request
-      CodeUri: origin-request/
-      Handler: app.lambdaHandler
+      CodeUri: requests/
+      Handler: origin-request.lambdaHandler
       Runtime: nodejs12.x
       AutoPublishAlias: live
       Events:

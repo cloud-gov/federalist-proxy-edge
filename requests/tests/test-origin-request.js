@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const AWSMocks = require('./aws-mocks');
 
-const index = require('../app');
+const index = require('../origin-request');
 const helpers = require('../helpers');
 
 const event = {
