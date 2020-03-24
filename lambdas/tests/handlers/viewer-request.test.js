@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const AWSMocks = require('../support/aws-mocks');
 
-const index = require('../../handlers/viewer-request');
+const { viewer_request } = require('../../app');
 
 const userPass = (user, pw) => ('Basic ' + Buffer.from(user + ':' + pw).toString('base64'));
 const event = {
@@ -30,7 +30,7 @@ const event = {
 };
 
 const lambdaHandler = (_event, context = undefined) => new Promise((resolve, reject) => {
-  index.lambdaHandler(_event, context, (error, response) => {
+  viewer_request(_event, context, (error, response) => {
     if (error) { reject(error) }
     resolve(response);
   });

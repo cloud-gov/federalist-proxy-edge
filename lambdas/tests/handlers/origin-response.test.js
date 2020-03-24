@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const index = require('../../handlers/origin-response');
+const { origin_response } = require('../../app');
 
 const event = {
   "Records": [
@@ -19,7 +19,7 @@ describe("The handler function", () => {
         const strict_transport_security = [{ key: "Strict-Transport-Security", value: "max-age=31536001; preload" }];
         const x_frame_options = [{key: 'X-Frame-Options', value: 'SAMEORIGIN'}];
 
-        const response = await index.lambdaHandler(event, {});
+        const response = await origin_response(event, {});
 
         expect(Object.keys(response.headers).length).to.equal(2);
         expect(response.headers["strict-transport-security"]).to.deep.equal(strict_transport_security);
