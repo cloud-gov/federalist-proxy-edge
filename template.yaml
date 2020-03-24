@@ -15,8 +15,8 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       FunctionName: fed-proxy-dev-basic-auth
-      CodeUri: requests/
-      Handler: viewer-request.lambdaHandler
+      CodeUri: lambdas/
+      Handler: app.viewer_request
       Runtime: nodejs12.x
       AutoPublishAlias: live
       Events:
@@ -31,8 +31,8 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       FunctionName: fed-proxy-dev-origin-request
-      CodeUri: requests/
-      Handler: origin-request.lambdaHandler
+      CodeUri: lambdas/
+      Handler: app.origin_request
       Runtime: nodejs12.x
       AutoPublishAlias: live
       Events:
@@ -46,9 +46,9 @@ Resources:
   CustomHeadersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: fed-proxy-dev-viewer-response
-      CodeUri: origin-response/
-      Handler: app.lambdaHandler
+      FunctionName: fed-proxy-dev-origin-response # should be fed-proxy-dev-origin-response
+      CodeUri: lambdas/
+      Handler: app.origin_response
       Runtime: nodejs12.x
       AutoPublishAlias: live
       Events:

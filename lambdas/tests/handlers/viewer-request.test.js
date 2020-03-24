@@ -1,8 +1,7 @@
 const { expect } = require('chai');
-const AWSMocks = require('./aws-mocks');
+const AWSMocks = require('../support/aws-mocks');
 
-const index = require('../viewer-request');
-const helpers = require('../helpers');
+const index = require('../../handlers/viewer-request');
 
 const userPass = (user, pw) => ('Basic ' + Buffer.from(user + ':' + pw).toString('base64'));
 const event = {

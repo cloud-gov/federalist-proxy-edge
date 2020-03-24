@@ -1,10 +1,10 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const AWSMocks = require('./aws-mocks');
+const AWSMocks = require('../support/aws-mocks');
 const { expect } = chai;
 chai.use(chaiAsPromised);
 
-const { getSiteConfig, getSiteQueryParams, parseURI } = require('../helpers');
+const { getSiteConfig, getSiteQueryParams, parseURI } = require('../../helpers/DynamoDBHelper');
 
 describe("getSiteConfig", () => {
     it("fetches site config", async () => {

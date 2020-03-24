@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const index = require('../app');
+const index = require('../../handlers/origin-response');
 
 const event = {
   "Records": [

@@ -1,8 +1,7 @@
 const { expect } = require('chai');
-const AWSMocks = require('./aws-mocks');
+const AWSMocks = require('../support/aws-mocks');
 
-const index = require('../origin-request');
-const helpers = require('../helpers');
+const index = require('../../handlers/origin-request');
 
 const event = {
   "Records": [
