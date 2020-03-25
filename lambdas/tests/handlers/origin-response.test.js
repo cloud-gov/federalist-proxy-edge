@@ -14,12 +14,20 @@ const event = {
     }
   ]
 };
+
+const lambdaHandler = (_event, context = undefined) => new Promise((resolve, reject) => {
+  origin_response(_event, context, (error, response) => {
+    if (error) { reject(error) };
+    resolve(response);
+  });
+});
+
 describe("The handler function", () => {
     it("returns the message", async() => {
         const strict_transport_security = [{ key: "Strict-Transport-Security", value: "max-age=31536001; preload" }];
         const x_frame_options = [{key: 'X-Frame-Options', value: 'SAMEORIGIN'}];
 
-        const response = await origin_response(event, {});
+        const response = await lambdaHandler(event, {});
 
         expect(Object.keys(response.headers).length).to.equal(2);
         expect(response.headers["strict-transport-security"]).to.deep.equal(strict_transport_security);

@@ -57,7 +57,7 @@ const origin_request = (event, context, callback) => {
         .catch(error => callback(error, null));
 };
 
-const origin_response = async (event, context) => {
+const origin_response = (event, context, callback) => {
 	console.log(`\nevent:\t${JSON.stringify(event)}\n`);
 	console.log(`\ncontext:\t${JSON.stringify(context)}\n`);
 
@@ -67,7 +67,7 @@ const origin_response = async (event, context) => {
     headers['strict-transport-security'] = [{key: 'Strict-Transport-Security', value: 'max-age=31536001; preload'}];
     headers['X-Frame-Options'] = [{key: 'X-Frame-Options', value: 'SAMEORIGIN'}];
     response.headers = headers;
-    return response;
+    callback(null, response);
 };
 // custom error handling
 // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html#lambda-examples-custom-error-new-site
