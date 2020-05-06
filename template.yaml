@@ -8,7 +8,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 120
 
 Resources:
   BasicAuthFunction:
@@ -19,12 +19,12 @@ Resources:
       Handler: app.viewer_request
       Runtime: nodejs12.x
       AutoPublishAlias: live
-      Events:
-        RequestOrigin:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /viewer-request
-            Method: get
+      # Events:
+      #   RequestOrigin:
+      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+      #     Properties:
+      #       Path: /viewer-request
+      #       Method: get
       Policies: AmazonDynamoDBReadOnlyAccess
 
   CustomOriginRoutingFunction:
@@ -35,12 +35,12 @@ Resources:
       Handler: app.origin_request
       Runtime: nodejs12.x
       AutoPublishAlias: live
-      Events:
-        RequestOrigin:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /origin-request
-            Method: get
+      # Events:
+      #   RequestOrigin:
+      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+      #     Properties:
+      #       Path: /origin-request
+      #       Method: get
       Policies: AmazonDynamoDBReadOnlyAccess
 
   CustomHeadersFunction:
@@ -51,12 +51,12 @@ Resources:
       Handler: app.origin_response
       Runtime: nodejs12.x
       AutoPublishAlias: live
-      Events:
-        RequestOrigin:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /origin-response
-            Method: get
+      # Events:
+      #   RequestOrigin:
+      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+      #     Properties:
+      #       Path: /origin-response
+      #       Method: get
 
   CloudFrontOriginAccessIdentity:
     Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
@@ -118,7 +118,9 @@ Resources:
           AcmCertificateArn: !Ref DomainCertificate
           MinimumProtocolVersion: TLSv1.1_2016
           SslSupportMethod: 'sni-only'
-
+        Logging:
+          Bucket: !GetAtt S3Bucket.DomainName
+          Prefix: 'cloudfront-logs/'
   S3Bucket:
     Type: AWS::S3::Bucket
 
@@ -127,7 +129,7 @@ Resources:
     Properties:
       TableName: federalist-proxy-dev
       PrimaryKey:
-        Name: owner_repository
+        Name: id
         Type: String
       Tags:
           AppType: Serverless

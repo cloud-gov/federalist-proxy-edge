@@ -1,5 +1,6 @@
 'use strict';
-const { getSiteConfig, getSiteQueryParams, parseURI } = require ("./helpers/dynamoDBHelper");
+const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain } = require ("./helpers/dynamoDBHelper");
+const site_key = 'id';
 
 const origin_request = (event, context, callback) => {
   console.log(`event:\t${JSON.stringify(event)}`)
@@ -14,13 +15,17 @@ const origin_request = (event, context, callback) => {
   // const uri = request.uri;
   console.log(`\nuri:\t${request.uri}\n`);
   
-    const { owner, repository, siteType, branch } = parseURI(request.uri);
+    // const { owner, repository, siteType, branch } = parseURI(request);
 
-    console.log(`\nsiteType:\t${siteType}\n`);
-    console.log(`\nowner:\t${owner}\n`);
-    console.log(`\nrepository:\t${repository}\n`);
-    console.log(`\nbranch:\t${branch}\n`);
-    const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", owner, repository);
+    // console.log(`\nsiteType:\t${siteType}\n`);
+    // console.log(`\nowner:\t${owner}\n`);
+    // console.log(`\nrepository:\t${repository}\n`);
+    // console.log(`\nbranch:\t${branch}\n`);
+
+    const subdomain = getSubdomain(request);
+    console.log(`\nsubdomain:\t${subdomain}\n`);
+
+    const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
       getSiteConfig(siteQueryParams)
         .then((siteConfig) => {
           const bucket = siteConfig['bucket_name'];
@@ -85,9 +90,11 @@ const viewer_request = (event, context, callback) => {
   console.log(`request:\t${JSON.stringify(request)}`);
 
 
-  const { owner, repository, siteType, branch } = parseURI(request.uri);
+  // const { owner, repository, siteType, branch } = parseURI(request);
+  const subdomain = getSubdomain(request);
+  console.log(`\nsubdomain:\t${subdomain}\n`);
   
-  const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", owner, repository);
+  const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
   
   getSiteConfig(siteQueryParams)
     .then((siteConfig) => {

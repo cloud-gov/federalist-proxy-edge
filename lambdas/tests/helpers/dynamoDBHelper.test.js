@@ -4,7 +4,7 @@ const AWSMocks = require('../support/aws-mocks');
 const { expect } = chai;
 chai.use(chaiAsPromised);
 
-const { getSiteConfig, getSiteQueryParams, parseURI } = require('../../helpers/DynamoDBHelper');
+const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain } = require('../../helpers/DynamoDBHelper');
 
 describe("getSiteConfig", () => {
     it("fetches site config", async () => {
@@ -52,8 +52,8 @@ describe("getSiteConfig", () => {
 
 describe("parseURI", () => {
   it("preview branch", () => {
-    const uri = '/preview/testOwner/testRepo/testBranch/index.html';
-    expect(parseURI(uri)).to.deep.equal({
+    const request = { uri: '/preview/testOwner/testRepo/testBranch/index.html' };
+    expect(parseURI(request)).to.deep.equal({
       owner: 'testOwner',
       repository: 'testRepo',
       siteType: 'preview',
@@ -62,8 +62,8 @@ describe("parseURI", () => {
   });
 
   it("non-preview branch", () => {
-    const uri = '/site/testOwner/testRepo/index.html';
-    expect(parseURI(uri)).to.deep.equal({
+    const request = { uri: '/site/testOwner/testRepo/index.html' };
+    expect(parseURI(request)).to.deep.equal({
       owner: 'testOwner',
       repository: 'testRepo',
       siteType: 'site',
@@ -72,23 +72,41 @@ describe("parseURI", () => {
   });
 })
 
+describe("getSubdomain", () => {
+  it("fetches subdomain", () => {
+    const request = {
+      headers: {
+        host: [
+          {
+            key: 'Host',
+            value: 'subdomain.example.gov',
+          },
+        ],
+      }
+    }
+    expect(getSubdomain(request)).to.equal('subdomain');
+  });
+})
+
 describe("getSiteQueryParams", () => {
   it("returns params", () => {
     const tableName = 'testTable';
-    const owner = 'testOwner';
-    const repository = 'testRepo';
+    // const owner = 'testOwner';
+    // const repository = 'testRepo';
+    const site_key = 'id';
+    const site_key_value = 'site-key';
 
     const expectedParams = {
       "TableName":"testTable",
-      "KeyConditionExpression": "#owner_repository = :owner_repository",
+      "KeyConditionExpression": "#id = :id",
       "ExpressionAttributeNames":
         {
-          "#owner_repository": "owner_repository",
+          "#id": "id",
         },
       "ExpressionAttributeValues": {
-        ":owner_repository": "testOwner/testRepo",
+        ":id": "site-key",
       }
     };
-    expect(getSiteQueryParams(tableName, owner, repository)).to.deep.equal(expectedParams);
+    expect(getSiteQueryParams(tableName, site_key, site_key_value)).to.deep.equal(expectedParams);
   })
 })

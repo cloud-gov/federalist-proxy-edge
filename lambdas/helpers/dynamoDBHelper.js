@@ -22,22 +22,27 @@ const getSiteConfig = (params) => new Promise((resolve, reject) => {
   });
 });
 
-const getSiteQueryParams = (tableName, owner, repository) => ({
-  TableName: tableName,
-  KeyConditionExpression: "#owner_repository = :owner_repository",
-  ExpressionAttributeNames:{
-   "#owner_repository": "owner_repository"
-  },
-  ExpressionAttributeValues: {
-   ":owner_repository": `${[owner, repository].join('/')}`
-  },
-})
+const getSiteQueryParams = (tableName, site_key, site_key_value) => {
+  const expressionAttributeNames = {};
+  expressionAttributeNames[`\#${site_key}`] = site_key;
 
-const parseURI = (uri) => {
-	const atts = uri.split("/");
+  const expressionAttributeValues = {};
+  expressionAttributeValues[`\:${site_key}`] = site_key_value;
+
+  return {
+    TableName: tableName,
+    KeyConditionExpression: `\#${site_key} = \:${site_key}`,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
+  };
+}
+
+const parseURI = (request) => {
+  const atts = request.uri.split("/");
   const siteType = atts[1];
   const owner = atts[2];
   const repository = atts[3];
+  const subdomain = atts[0].split('.')[0];
 
   let branch = null;
   if (siteType === 'preview') {
@@ -45,4 +50,7 @@ const parseURI = (uri) => {
   }
   return { owner, repository, siteType, branch }
 }
-module.exports = { getSiteConfig, getSiteQueryParams, parseURI };
+
+const getSubdomain = (request) => request.headers['host'][0].value.split('.')[0];
+
+module.exports = { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain };
