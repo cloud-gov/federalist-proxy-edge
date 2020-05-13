@@ -2,7 +2,7 @@ const AWS = require("aws-sdk");
 
 const getSiteConfig = (params) => new Promise((resolve, reject) => {
 
-  const docClient = new AWS.DynamoDB.DocumentClient();
+  const docClient = new AWS.DynamoDB.DocumentClient({ httpOptions: { connectTimeout: 120000, timeout: 120000 }});
   docClient.query(params, function(err, data) {
     if (err) {
       reject("Unable to query. Error:", JSON.stringify(err, null, 2));
