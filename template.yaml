@@ -19,12 +19,6 @@ Resources:
       Handler: app.viewer_request
       Runtime: nodejs12.x
       AutoPublishAlias: live
-      # Events:
-      #   RequestOrigin:
-      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-      #     Properties:
-      #       Path: /viewer-request
-      #       Method: get
       Policies: AmazonDynamoDBReadOnlyAccess
 
   CustomOriginRoutingFunction:
@@ -35,12 +29,6 @@ Resources:
       Handler: app.origin_request
       Runtime: nodejs12.x
       AutoPublishAlias: live
-      # Events:
-      #   RequestOrigin:
-      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-      #     Properties:
-      #       Path: /origin-request
-      #       Method: get
       Policies: AmazonDynamoDBReadOnlyAccess
 
   CustomHeadersFunction:
@@ -51,19 +39,12 @@ Resources:
       Handler: app.origin_response
       Runtime: nodejs12.x
       AutoPublishAlias: live
-      # Events:
-      #   RequestOrigin:
-      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-      #     Properties:
-      #       Path: /origin-response
-      #       Method: get
 
   CloudFrontOriginAccessIdentity:
     Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
     Properties:
       CloudFrontOriginAccessIdentityConfig:
         Comment: 'Serverless website OA'
-
 
   CloudfrontDistribution:
     Type: AWS::CloudFront::Distribution
