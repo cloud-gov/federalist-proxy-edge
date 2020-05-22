@@ -83,6 +83,10 @@ const viewer_request = (event, context, callback) => {
 
   // Get the request and its headers
   let request = event.Records[0].cf.request;
+
+  if (parseURI(request).siteType !== 'preview') {
+    callback(null, request);
+  }
   
   request.headers['x-forwarded-host'] = [
     { key: 'X-Forwarded-Host', value: request.headers.host[0].value }
