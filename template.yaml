@@ -10,11 +10,21 @@ Globals:
   Function:
     Timeout: 5 # timeouts for viewer can be < 5 and for origin < 30
 
+Parameters:
+  StackEnv:
+    Type: String
+    Default: dev
+    AllowedValues: 
+      - dev
+      - staging
+      - prod
+    Description: stack environemnt
+
 Resources:
   BasicAuthFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: fed-proxy-dev-basic-auth
+      FunctionName: !Sub "fed-proxy-${StackEnv}-basic-auth"
       CodeUri: lambdas/
       Handler: app.viewer_request
       Runtime: nodejs12.x
@@ -24,7 +34,7 @@ Resources:
   CustomOriginRoutingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: fed-proxy-dev-origin-request
+      FunctionName: !Sub "fed-proxy-${StackEnv}-origin-request"
       CodeUri: lambdas/
       Handler: app.origin_request
       Runtime: nodejs12.x
@@ -34,7 +44,7 @@ Resources:
   CustomHeadersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: fed-proxy-dev-origin-response # should be fed-proxy-dev-origin-response
+      FunctionName: !Sub "fed-proxy-${StackEnv}-origin-response"
       CodeUri: lambdas/
       Handler: app.origin_response
       Runtime: nodejs12.x
@@ -94,7 +104,7 @@ Resources:
             Cookies:
               Forward: none
         Aliases:
-          - '*.sites-dev.federalist.18f.gov'
+          - !Sub "*.sites-${StackEnv}.federalist.18f.gov"
         ViewerCertificate:
           AcmCertificateArn: !Ref DomainCertificate
           MinimumProtocolVersion: TLSv1.1_2016
@@ -108,7 +118,7 @@ Resources:
   DynamoSiteTable:
     Type: AWS::Serverless::SimpleTable # if you want to define a more complex table, use AWS::DynamoDB::Table
     Properties:
-      TableName: federalist-proxy-dev
+      TableName: !Sub "federalist-proxy-${StackEnv}"
       PrimaryKey:
         Name: id
         Type: String
@@ -118,7 +128,7 @@ Resources:
   DomainCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties: 
-      DomainName: '*.sites-dev.federalist.18f.gov'
+      DomainName: !Sub "*.sites-${StackEnv}.federalist.18f.gov"
       ValidationMethod: DNS
 
 Outputs:
