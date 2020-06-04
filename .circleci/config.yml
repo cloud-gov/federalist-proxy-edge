@@ -5,14 +5,14 @@ jobs:
       - checkout
       - sam/install
       - run: sam build --parameter-overrides StackEnv=dev
-      - run: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev  --confirm-changeset=False
+      - run: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev
   # build_and_deploy_production:
   #   executor: sam/default
   #   steps:
   #     - checkout
   #     - sam/install
   #     - run: sam build --parameter-overrides StackEnv=dev
-  #     - run: sam deploy --parameter-overrides StackEnv=prod --stack-name=fed-proxy-prod  --confirm-changeset=False
+  #     - run: sam deploy --parameter-overrides StackEnv=prod --stack-name=fed-proxy-prod
 orbs:
   sam: circleci/aws-sam-serverless@1.0.1
 version: 2.1
