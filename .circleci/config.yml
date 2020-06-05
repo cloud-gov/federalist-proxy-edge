@@ -4,8 +4,8 @@ jobs:
     steps:
       - checkout
       - aws-serverless/install
-      - run: sam build --parameter-overrides StackEnv=dev
-      - run: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev
+      - run: sam build --parameter-overrides StackEnv=dev --region us-east-1
+      - run: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev --region us-east-1
   # build_and_deploy_production:
   #   executor: sam/default
   #   steps:
