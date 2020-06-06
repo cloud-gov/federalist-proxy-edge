@@ -9,7 +9,6 @@ jobs:
        - *default-docker-node
     steps:
       - checkout
-      - run: cd lambdas
       - run:
           name: Display versions
           command: |
@@ -21,11 +20,11 @@ jobs:
           key: dependency-cache-{{ checksum "yarn.lock" }}
       - run:
           name: Install dependencies
-          command: yarn --pure-lockfile
+          command: yarn --cwd lambdas --pure-lockfile
       - save_cache:
           key: dependency-cache-{{ checksum "yarn.lock" }}
           paths:
-            - ./node_modules
+            - ./lambdas/node_modules
             - ~/.cache/yarn
 
       # - run:
@@ -40,7 +39,7 @@ jobs:
       #       ./cc-test-reporter before-build
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn --cwd lambdas test
   build_and_deploy_staging:
     executor: aws-serverless/default
     steps:
