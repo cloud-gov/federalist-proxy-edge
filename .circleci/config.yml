@@ -7,7 +7,7 @@ jobs:
   test-stack:
     docker:
        - *default-docker-node
-     steps:
+    steps:
       - checkout
       - run: cd lambdas
       - run:
