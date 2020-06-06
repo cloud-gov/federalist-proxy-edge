@@ -1,4 +1,46 @@
+default-docker-node: &default-docker-node
+  image: circleci/node:12
+  environment:
+    YARN_VERSION: 0.24.6-1
+
 jobs:
+  test-stack:
+    docker:
+       - *default-docker-node
+     steps:
+      - checkout
+      - run: cd lambdas
+      - run:
+          name: Display versions
+          command: |
+            echo $(node --version)
+            echo $(yarn --version)
+            echo $(npm --version)
+
+      - restore_cache:
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install dependencies
+          command: yarn --pure-lockfile
+      - save_cache:
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - ./node_modules
+            - ~/.cache/yarn
+
+      # - run:
+      #     name: Lint changed files
+      #     command: scripts/lint-ci-pr.sh
+
+      # - run:
+      #     name: CodeClimate before-build
+      #     command: |
+      #       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      #       chmod +x ./cc-test-reporter
+      #       ./cc-test-reporter before-build
+      - run:
+          name: Run tests
+          command: yarn test
   build_and_deploy_staging:
     executor: aws-serverless/default
     steps:
@@ -6,15 +48,22 @@ jobs:
       - aws-serverless/install:
           aws-access-key-id: AWS_ACCESS_KEY_ID_DEV
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY_DEV
-      - run: sam build --parameter-overrides StackEnv=dev --region us-east-1
-      - run: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev --region us-east-1
+      - run:
+          name: sam build staging
+          command: sam build --parameter-overrides StackEnv=dev --region us-east-1
+      - run:
+          name: "sam deploy staging"
+          command: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev --region us-east-1
 orbs:
   aws-serverless: circleci/aws-serverless@1.0.2
 version: 2.1
 workflows:
   build_and_deploy:
     jobs:
+      - test-stack
       - build_and_deploy_staging:
-        filters:
-          branches:
-            only: circleci
+          requires:
+            test-stack
+          # filters:
+          #   branches:
+          #     only: circleci
