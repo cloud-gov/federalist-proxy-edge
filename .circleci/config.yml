@@ -3,7 +3,9 @@ jobs:
     executor: aws-serverless/default
     steps:
       - checkout
-      - aws-serverless/install
+      - aws-serverless/install:
+          aws-access-key-id: AWS_ACCESS_KEY_ID_DEV
+          aws-secret-access-key-dev: AWS_SECRET_ACCESS_KEY_DEV
       - run: sam build --parameter-overrides StackEnv=dev --region us-east-1
       - run: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev --region us-east-1
   # build_and_deploy_production:
