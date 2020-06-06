@@ -8,13 +8,6 @@ jobs:
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY_DEV
       - run: sam build --parameter-overrides StackEnv=dev --region us-east-1
       - run: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev --region us-east-1
-  # build_and_deploy_production:
-  #   executor: sam/default
-  #   steps:
-  #     - checkout
-  #     - sam/install
-  #     - run: sam build --parameter-overrides StackEnv=prod
-  #     - run: sam deploy --parameter-overrides StackEnv=prod --stack-name=fed-proxy-prod
 orbs:
   aws-serverless: circleci/aws-serverless@1.0.2
 version: 2.1
@@ -25,7 +18,3 @@ workflows:
         filters:
           branches:
             only: circleci
-      # - build_and_deploy_production:
-      #   filters:
-      #     branches:
-      #       only: master
