@@ -49,10 +49,10 @@ jobs:
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY_DEV
       - run:
           name: sam build staging
-          command: sam build --parameter-overrides StackEnv=dev --region us-east-1
+          command: sam build --parameter-overrides StackEnv=dev
       - run:
           name: "sam deploy staging"
-          command: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev --region us-east-1
+          command: sam deploy --parameter-overrides StackEnv=dev --stack-name=fed-proxy-dev
 orbs:
   aws-serverless: circleci/aws-serverless@1.0.2
 version: 2.1
