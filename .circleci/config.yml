@@ -16,16 +16,16 @@ jobs:
             echo $(yarn --version)
             echo $(npm --version)
 
-      # - restore_cache:
-      #     key: dependency-cache-{{ checksum "yarn.lock" }}
+      - restore_cache:
+          key: dependency-cache-{{ checksum "lambdas/yarn.lock" }}
       - run:
           name: Install dependencies
           command: yarn --cwd lambdas --pure-lockfile
-      # - save_cache:
-      #     key: dependency-cache-{{ checksum "yarn.lock" }}
-      #     paths:
-      #       - ./lambdas/node_modules
-      #       - ~/.cache/yarn
+      - save_cache:
+          key: dependency-cache-{{ checksum "lambdas/yarn.lock" }}
+          paths:
+            - ./lambdas/node_modules
+            - ~/.cache/yarn
 
       # - run:
       #     name: Lint changed files
@@ -63,6 +63,6 @@ workflows:
       - build_and_deploy_staging:
           requires:
             - test-stack
-          # filters:
-          #   branches:
-          #     only: circleci
+          filters:
+            branches:
+              only: circleci
