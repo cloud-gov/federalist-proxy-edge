@@ -65,4 +65,4 @@ workflows:
             - test-stack
           filters:
             branches:
-              only: circleci
+              only: master
