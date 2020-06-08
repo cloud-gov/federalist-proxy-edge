@@ -89,7 +89,7 @@ const viewer_request = (event, context, callback) => {
     .then((siteConfig) => {
       const credentials = siteConfig['basic_auth'];
       if (credentials) {
-        const user = credentials['user'];
+        const user = credentials['username'];
         const pw = credentials['password'];
         
         // Build a Basic Authentication string

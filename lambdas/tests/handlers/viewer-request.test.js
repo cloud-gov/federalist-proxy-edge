@@ -65,7 +65,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: userPass(username, password) }}],
+      Items: [{ settings: { basic_auth: { username, password }}}],
     };
 
     const response = await lambdaHandler(event, undefined);
@@ -80,7 +80,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: userPass(username, password) }}],
+      Items: [{ settings: { basic_auth: { username, password }}}],
     };
   
     AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
@@ -105,11 +105,11 @@ describe("The handler function", () => {
   });
 
   it("basic auth successful", async () => {
-    const user = 'testUser';
+    const username = 'testUser';
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: { user, password }}}],
+      Items: [{ settings: { basic_auth: { username, password }}}],
     };
   
     AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
@@ -119,7 +119,7 @@ describe("The handler function", () => {
     const authEvent = Object.assign({}, event);
     authEvent["Records"][0].cf.request.headers.authorization = [{
       key: 'Authorization',
-      value: userPass(user, password)
+      value: userPass(username, password)
     }];
 
     const response = await lambdaHandler(authEvent, undefined);
@@ -134,7 +134,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: userPass(username, password) }}],
+      Items: [{ settings: { basic_auth: { username, password }}}],
     };
   
     AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
