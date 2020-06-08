@@ -15,7 +15,7 @@ const getSiteConfig = (params) => new Promise((resolve, reject) => {
           resolve(settings);
         });
       } else {
-        console.log(`\nQuery succeeded: no results found\n`);
+        console.log(`\nQuery succeeded: no results found!!\n`);
         resolve();
       }
     }
