@@ -7,10 +7,9 @@ const getSiteConfig = (params) => new Promise((resolve, reject) => {
     if (err) {
       reject("Unable to query. Error:", JSON.stringify(err, null, 2));
     } else {
-      console.log(`\nQuery succeeded.\t${JSON.stringify(data)}\n`);
       if (data.Count > 0){
         data.Items.forEach(function(item) {
-          console.log(JSON.stringify(item));
+          console.log(`\nQuery succeeded: item found @id:${JSON.stringify(item.id)}\n`);
           const settings = item.settings;
           resolve(settings);
         });

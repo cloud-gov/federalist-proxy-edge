@@ -3,27 +3,16 @@ const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain } = require ("
 const site_key = 'id';
 
 const origin_request = (event, context, callback) => {
-  console.log(`event:\t${JSON.stringify(event)}`)
+  console.log(`origin_request event:\t${JSON.stringify(event)}`);
   const request = event.Records[0].cf.request;
+  console.log(`\norigin_request(in):\t${JSON.stringify(request)}\n`);
 
    /**
     * Reads query string to check if S3 origin should be used, and
     * if true, sets S3 origin properties.
     */
 
-  console.log(`\nrequest:\t${JSON.stringify(request)}\n`);
-  // const uri = request.uri;
-  console.log(`\nuri:\t${request.uri}\n`);
-  
-    // const { owner, repository, siteType, branch } = parseURI(request);
-
-    // console.log(`\nsiteType:\t${siteType}\n`);
-    // console.log(`\nowner:\t${owner}\n`);
-    // console.log(`\nrepository:\t${repository}\n`);
-    // console.log(`\nbranch:\t${branch}\n`);
-
-    const subdomain = getSubdomain(request);
-    console.log(`\nsubdomain:\t${subdomain}\n`);
+  const subdomain = getSubdomain(request);
 
     const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
       getSiteConfig(siteQueryParams)
@@ -31,17 +20,6 @@ const origin_request = (event, context, callback) => {
           const bucket = siteConfig['bucket_name'];
           if (bucket) {
             const s3DomainName = `${bucket}.app.cloud.gov`;
-            // const s3DomainName = `${bucket}.s3-website-${region}.amazonaws.com`; // will need region
-            /* Set S3 origin fields */
-            // request.origin = {
-            //     s3: {
-            //         domainName: s3DomainName,
-            //         //region: region, //'',
-            //         //authMethod: 'none',
-            //        // path: `/${paths.slice(5).join("/")}`, // '',
-            //        //  customHeaders: {}
-            //     }
-            // };
   
             request.origin = {
               custom: {
@@ -56,23 +34,32 @@ const origin_request = (event, context, callback) => {
             };
             request.headers['host'] = [{ key: 'host', value: s3DomainName}];
           }
-          console.log(`\nrequest.origin:\t${JSON.stringify(request.origin)}\n`);
+          console.log(`\norigin_request(out):\t${JSON.stringify(request)}\n`);
         })
         .then(() => callback(null, request))
-        .catch(error => callback(error, null));
+        .catch(error => {
+          console.log(`\norigin_request(error):\t${error}`);
+          callback(error, null);
+        });
 };
 
 const origin_response = (event, context, callback) => {
-	console.log(`\nevent:\t${JSON.stringify(event)}\n`);
-	console.log(`\ncontext:\t${JSON.stringify(context)}\n`);
-
+  try {
+    console.log(`origin_response event:\t${JSON.stringify(event)}`);
     const response = event.Records[0].cf.response;
-    const headers = response.headers;
+    console.log(`\norigin_response(in):\t${JSON.stringify(response)}\n`);
 
+    const headers = response.headers;
     headers['strict-transport-security'] = [{key: 'Strict-Transport-Security', value: 'max-age=31536001; preload'}];
     headers['X-Frame-Options'] = [{key: 'X-Frame-Options', value: 'SAMEORIGIN'}];
     response.headers = headers;
+    console.log(`\norigin_response(out):\t${JSON.stringify(response)}\n`);
     callback(null, response);
+  }
+  catch (error) {
+    console.log(`\norigin_response(error):\t${error}`);
+    callback(error, null);
+  }
 };
 // custom error handling
 // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-examples.html#lambda-examples-custom-error-new-site
@@ -80,9 +67,10 @@ const origin_response = (event, context, callback) => {
 
 
 const viewer_request = (event, context, callback) => {
-
+  console.log(`viewer_request event:\t${JSON.stringify(event)}`);
   // Get the request and its headers
   let request = event.Records[0].cf.request;
+  console.log(`\nviewer_request(in):\t${JSON.stringify(request)}\n`);
 
   if (parseURI(request).siteType !== 'preview') {
     callback(null, request);
@@ -91,12 +79,9 @@ const viewer_request = (event, context, callback) => {
   request.headers['x-forwarded-host'] = [
     { key: 'X-Forwarded-Host', value: request.headers.host[0].value }
   ];
-  console.log(`request:\t${JSON.stringify(request)}`);
 
 
-  // const { owner, repository, siteType, branch } = parseURI(request);
   const subdomain = getSubdomain(request);
-  console.log(`\nsubdomain:\t${subdomain}\n`);
   
   const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
   
@@ -125,13 +110,14 @@ const viewer_request = (event, context, callback) => {
           },
         };
       }
+      console.log(`\nviewer_request(out):\t${JSON.stringify(request)}\n`);
     })
-    .then(() => callback(null, request))
-    .catch(error => callback(error, null));
-  
+    .then(() => callback(null, request)) // User has authenticated
+    .catch(error => {
+      console.log(`\nviewer_request(error):\t${error}`);
+      callback(error, null);
+    });
 
-  // User has authenticated
-  // callback(null, request);
 };
 
 module.exports = { origin_request, viewer_request, origin_response  };
