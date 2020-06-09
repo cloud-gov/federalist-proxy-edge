@@ -51,5 +51,6 @@ const parseURI = (request) => {
 }
 
 const getSubdomain = (request) => request.headers['host'][0].value.split('.')[0];
+const getAppEnv = (request) => request.headers['host'][0].value.split('.')[1].split('-')[1];
 
-module.exports = { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain };
+module.exports = { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain, getAppEnv };

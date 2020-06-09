@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { origin_response } = require('../../app');
+const { originResponse } = require('../../app');
 
 const event = {
   "Records": [
@@ -16,7 +16,7 @@ const event = {
 };
 
 const lambdaHandler = (_event, context = undefined) => new Promise((resolve, reject) => {
-  origin_response(_event, context, (error, response) => {
+  originResponse(_event, context, (error, response) => {
     if (error) { reject(error) };
     resolve(response);
   });

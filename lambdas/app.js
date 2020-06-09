@@ -1,8 +1,8 @@
 'use strict';
-const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain } = require ("./helpers/dynamoDBHelper");
+const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain, getAppEnv } = require ("./helpers/dynamoDBHelper");
 const site_key = 'id';
 
-const origin_request = (event, context, callback) => {
+const originRequest = (event, context, callback) => {
   console.log(`origin_request event:\t${JSON.stringify(event)}`);
   const request = event.Records[0].cf.request;
   console.log(`\norigin_request(in):\t${JSON.stringify(request)}\n`);
@@ -14,7 +14,7 @@ const origin_request = (event, context, callback) => {
 
   const subdomain = getSubdomain(request);
 
-    const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
+    const siteQueryParams = getSiteQueryParams(`federalist-proxy-${getAppEnv(request)}`, site_key, subdomain);
       getSiteConfig(siteQueryParams)
         .then((siteConfig) => {
           const bucket = siteConfig['bucket_name'];
@@ -43,7 +43,7 @@ const origin_request = (event, context, callback) => {
         });
 };
 
-const origin_response = (event, context, callback) => {
+const originResponse = (event, context, callback) => {
   try {
     console.log(`origin_response event:\t${JSON.stringify(event)}`);
     const response = event.Records[0].cf.response;
@@ -66,11 +66,11 @@ const origin_response = (event, context, callback) => {
 // https://stackoverflow.com/questions/28449363/why-is-this-http-request-not-working-on-aws-lambda
 
 
-const viewer_request = (event, context, callback) => {
-  console.log(`viewer_request event:\t${JSON.stringify(event)}`);
+const viewerRequest = (event, context, callback) => {
+  console.log(`viewerRequest event:\t${JSON.stringify(event)}`);
   // Get the request and its headers
   let request = event.Records[0].cf.request;
-  console.log(`\nviewer_request(in):\t${JSON.stringify(request)}\n`);
+  console.log(`\nviewerRequest(in):\t${JSON.stringify(request)}\n`);
 
   if (parseURI(request).siteType !== 'preview') {
     callback(null, request);
@@ -83,7 +83,7 @@ const viewer_request = (event, context, callback) => {
 
   const subdomain = getSubdomain(request);
   
-  const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
+  const siteQueryParams = getSiteQueryParams(`federalist-proxy-${getAppEnv(request)}`, site_key, subdomain);
   
   getSiteConfig(siteQueryParams)
     .then((siteConfig) => {
@@ -110,14 +110,14 @@ const viewer_request = (event, context, callback) => {
           },
         };
       }
-      console.log(`\nviewer_request(out):\t${JSON.stringify(request)}\n`);
+      console.log(`\nviewerRequest(out):\t${JSON.stringify(request)}\n`);
     })
     .then(() => callback(null, request)) // User has authenticated
     .catch(error => {
-      console.log(`\nviewer_request(error):\t${error}`);
+      console.log(`\nviewerRequest(error):\t${error}`);
       callback(error, null);
     });
 
 };
 
-module.exports = { origin_request, viewer_request, origin_response  };
+module.exports = { originRequest, viewerRequest, originResponse  };

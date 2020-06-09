@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const AWSMocks = require('../support/aws-mocks');
 
-const { origin_request } = require('../../app');
+const { originRequest } = require('../../app');
 
 const event = {
   "Records": [
@@ -18,7 +18,7 @@ const event = {
             "host": [
               {
                 "key": "Host",
-                "value": "d123.cf.net"
+                "value": "d123.cf-dev.net"
               }
             ],
             "user-agent": [
@@ -41,7 +41,7 @@ const event = {
 };
 
 const lambdaHandler = (_event, context = undefined) => new Promise((resolve, reject) => {
-  origin_request(_event, context, (error, response) => {
+  originRequest(_event, context, (error, response) => {
     if (error) { reject(error) }
     resolve(response);
   });

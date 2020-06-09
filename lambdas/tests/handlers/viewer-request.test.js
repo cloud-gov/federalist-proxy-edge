@@ -1,12 +1,12 @@
 const { expect } = require('chai');
 const AWSMocks = require('../support/aws-mocks');
 
-const { viewer_request } = require('../../app');
+const { viewerRequest } = require('../../app');
 
 const userPass = (user, pw) => ('Basic ' + Buffer.from(user + ':' + pw).toString('base64'));
 
 const lambdaHandler = (_event, context = undefined) => new Promise((resolve, reject) => {
-  viewer_request(_event, context, (error, response) => {
+  viewerRequest(_event, context, (error, response) => {
     if (error) { reject(error) }
     resolve(response);
   });
@@ -30,7 +30,7 @@ describe("The handler function", () => {
                 "host": [
                   {
                     "key": "Host",
-                    "value": "d123.cf.net"
+                    "value": "d123.cf-dev.net"
                   }
                 ],
               }

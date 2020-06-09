@@ -4,7 +4,7 @@ const AWSMocks = require('../support/aws-mocks');
 const { expect } = chai;
 chai.use(chaiAsPromised);
 
-const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain } = require('../../helpers/dynamoDBHelper');
+const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain, getAppEnv } = require('../../helpers/dynamoDBHelper');
 
 describe("getSiteConfig", () => {
     it("fetches site config", async () => {
@@ -85,6 +85,22 @@ describe("getSubdomain", () => {
       }
     }
     expect(getSubdomain(request)).to.equal('subdomain');
+  });
+})
+
+describe("getAppEnv", () => {
+  it("fetches app env", () => {
+    const request = {
+      headers: {
+        host: [
+          {
+            key: 'Host',
+            value: 'subdomain.sites-myenv.example.gov',
+          },
+        ],
+      }
+    }
+    expect(getAppEnv(request)).to.equal('myenv');
   });
 })
 
