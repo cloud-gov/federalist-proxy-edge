@@ -95,7 +95,7 @@ Resources:
               EventType: viewer-request
               LambdaFunctionARN: !Ref BasicAuthFunction.Version
           ForwardedValues:
-            QueryString: 'false'
+            QueryString: true
             Headers:
               - "X-Frame-Options"
               - host
