@@ -1,5 +1,6 @@
 const { expect } = require('chai');
-const AWSMocks = require('../support/aws-mocks');
+const sinon = require('sinon');
+const { stubDocDBQuery } = require('../support');
 
 const { originRequest } = require('../../lambdas/app');
 
@@ -40,25 +41,20 @@ const event = {
   ],
 };
 
-const lambdaHandler = (_event, context = undefined) => new Promise((resolve, reject) => {
-  originRequest(_event, context, (error, response) => {
-    if (error) { reject(error); }
-    resolve(response);
+describe('originRequest', () => {
+  afterEach(() => {
+    sinon.restore();
   });
-});
 
-describe('The handler function', () => {
   it('returns a message', async () => {
-    results = {
+    const results = {
       Count: 1,
       Items: [{ settings: { bucket_name: 'testBucket' } }],
     };
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
-      callback(null, results);
-    };
+    stubDocDBQuery(() => results);
 
-    const response = await lambdaHandler(event, undefined);
+    const response = await originRequest(event);
     expect(response.origin.custom.domainName.split('.')[0]).to.equal('testBucket');
     expect(response.headers.host[0].key).to.equal('host');
     expect(response.headers.host[0].value.split('.')[0]).to.equal('testBucket');

@@ -1,18 +1,16 @@
 const { expect } = require('chai');
-const AWSMocks = require('../support/aws-mocks');
+const sinon = require('sinon');
+const { stubDocDBQuery } = require('../support');
 
 const { viewerRequest } = require('../../lambdas/app');
 
 const userPass = (user, pw) => (`Basic ${Buffer.from(`${user}:${pw}`).toString('base64')}`);
 
-const lambdaHandler = (_event, context = undefined) => new Promise((resolve, reject) => {
-  viewerRequest(_event, context, (error, response) => {
-    if (error) { reject(error); }
-    resolve(response);
+describe('viewerRequest', () => {
+  afterEach(() => {
+    sinon.restore();
   });
-});
 
-describe('The handler function', () => {
   let event;
   beforeEach(() => {
     event = {
@@ -40,19 +38,16 @@ describe('The handler function', () => {
       ],
     };
   });
+
   it('basic auth disabled', async () => {
-    const username = 'testUser';
-    const password = 'testPassword';
     const queryResults = {
       Count: 1,
       Items: [{ settings: {} }],
     };
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
-      callback(null, queryResults);
-    };
+    stubDocDBQuery(() => queryResults);
 
-    const response = await lambdaHandler(event, undefined);
+    const response = await viewerRequest(event);
 
     expect(response.headers['x-forwarded-host'][0].key).to.equal('X-Forwarded-Host');
     expect(response.headers['x-forwarded-host'][0].value).to.equal(event.Records[0].cf.request.headers.host[0].value);
@@ -67,8 +62,12 @@ describe('The handler function', () => {
       Items: [{ settings: { basic_auth: { username, password } } }],
     };
 
-    const response = await lambdaHandler(event, undefined);
+    stubDocDBQuery(() => queryResults);
 
+    const response = await viewerRequest(event);
+
+    // AMIR
+    // There may have been a bug here, wondering if callback was called multiple times before...
     expect(response.headers['x-forwarded-host'][0].key).to.equal('X-Forwarded-Host');
     expect(response.headers['x-forwarded-host'][0].value).to.equal(event.Records[0].cf.request.headers.host[0].value);
   });
@@ -81,11 +80,9 @@ describe('The handler function', () => {
       Items: [{ settings: { basic_auth: { username, password } } }],
     };
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
-      callback(null, queryResults);
-    };
+    stubDocDBQuery(() => queryResults);
 
-    const response = await lambdaHandler(event, undefined);
+    const response = await viewerRequest(event);
 
     expect(response).to.deep.equal({
       status: '401',
@@ -110,9 +107,7 @@ describe('The handler function', () => {
       Items: [{ settings: { basic_auth: { username, password } } }],
     };
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
-      callback(null, queryResults);
-    };
+    stubDocDBQuery(() => queryResults);
 
     const authEvent = { ...event };
     authEvent.Records[0].cf.request.headers.authorization = [{
@@ -120,7 +115,7 @@ describe('The handler function', () => {
       value: userPass(username, password),
     }];
 
-    const response = await lambdaHandler(authEvent, undefined);
+    const response = await viewerRequest(authEvent);
 
     expect(response.headers['x-forwarded-host'][0].key).to.equal('X-Forwarded-Host');
     expect(response.headers['x-forwarded-host'][0].value).to.equal(event.Records[0].cf.request.headers.host[0].value);
@@ -134,9 +129,7 @@ describe('The handler function', () => {
       Items: [{ settings: { basic_auth: { username, password } } }],
     };
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
-      callback(null, queryResults);
-    };
+    stubDocDBQuery(() => queryResults);
 
     const authEvent = { ...event };
     authEvent.Records[0].cf.request.headers.authorization = [{
@@ -144,7 +137,7 @@ describe('The handler function', () => {
       value: 'invalidUserPassword',
     }];
 
-    const response = await lambdaHandler(authEvent, undefined);
+    const response = await viewerRequest(authEvent);
 
     expect(response).to.deep.equal({
       status: '401',

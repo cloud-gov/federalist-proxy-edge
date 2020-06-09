@@ -19,20 +19,20 @@ const getSiteConfig = (params) => {
         return item.settings;
       }
       log('\nQuery succeeded: no results found!!\n');
-      return {};
+      return undefined;
     });
 };
 
 const getSiteQueryParams = (tableName, siteKey, siteKeyValue) => {
   const expressionAttributeNames = {};
-  expressionAttributeNames[`\#${siteKey}`] = siteKey;
+  expressionAttributeNames[`#${siteKey}`] = siteKey;
 
   const expressionAttributeValues = {};
-  expressionAttributeValues[`\:${siteKey}`] = siteKeyValue;
+  expressionAttributeValues[`:${siteKey}`] = siteKeyValue;
 
   return {
     TableName: tableName,
-    KeyConditionExpression: `\#${siteKey} = \:${siteKey}`,
+    KeyConditionExpression: `#${siteKey} = :${siteKey}`,
     ExpressionAttributeNames: expressionAttributeNames,
     ExpressionAttributeValues: expressionAttributeValues,
   };
@@ -40,14 +40,11 @@ const getSiteQueryParams = (tableName, siteKey, siteKeyValue) => {
 
 const parseURI = (request) => {
   const [, siteType, owner, repository, branch] = request.uri.split('/');
-  // const subdomain = domain.split('.')[0];
-
-  // let branch = null;
-  // if (siteType === 'preview') {
-  //   branch = atts[4];
-  // }
   return {
-    owner, repository, siteType, branch,
+    owner,
+    repository,
+    siteType,
+    branch: siteType === 'preview' ? branch : null,
   };
 };
 

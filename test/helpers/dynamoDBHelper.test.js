@@ -1,13 +1,14 @@
 const { expect } = require('chai');
-const AWSMocks = require('../support/aws-mocks');
+const sinon = require('sinon');
+const { stubDocDBQuery } = require('../support');
 
 const {
   getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
-describe.only('getSiteConfig', () => {
+describe('getSiteConfig', () => {
   afterEach(() => {
-    AWSMocks.resetMocks();
+    sinon.restore();
   });
 
   it('fetches site config', async () => {
@@ -18,7 +19,7 @@ describe.only('getSiteConfig', () => {
       Items: [{ settings: { bucket_name: 'testBucket' } }],
     };
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = () => results;
+    stubDocDBQuery(() => results);
 
     const response = await getSiteConfig(params);
     expect(response).to.deep.equal({ bucket_name: 'testBucket' });
@@ -32,20 +33,18 @@ describe.only('getSiteConfig', () => {
       Items: [],
     };
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = () => results;
+    stubDocDBQuery(() => results);
 
     const response = await getSiteConfig(params);
-    expect(response).to.be.undefined;
+    expect(response).to.eq(undefined);
   });
 
   it('rejected', async () => {
     const params = {};
 
-    AWSMocks.mocks.DynamoDB.DocumentClient.query = () => {
-      throw new Error('test error');
-    };
+    stubDocDBQuery(() => { throw new Error('test error'); });
 
-    expect(getSiteConfig(params)).to.eventually.be.rejected;
+    return expect(getSiteConfig(params)).to.eventually.be.rejected;
   });
 });
 

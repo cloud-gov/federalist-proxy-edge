@@ -74,17 +74,20 @@ const viewerRequest = async (event) => {
   return getSiteConfig(siteQueryParams)
     .then((siteConfig) => {
       const { basic_auth: credentials } = siteConfig;
-      if (credentials) {
-        const { username, password } = credentials;
 
-        // Build a Basic Authentication string
-        const authString = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+      if (!credentials) {
+        return request;
+      }
 
-        // Challenge for auth if auth credentials are absent or incorrect
-        const { authorization } = request.headers;
-        if (authorization && authorization.length && authorization[0].value === authString) {
-          return request;
-        }
+      const { username, password } = credentials;
+
+      // Build a Basic Authentication string
+      const authString = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+
+      // Challenge for auth if auth credentials are absent or incorrect
+      const { authorization } = request.headers;
+      if (authorization && authorization.length && authorization[0].value === authString) {
+        return request;
       }
 
       return {
