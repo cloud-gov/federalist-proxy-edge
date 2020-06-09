@@ -81,7 +81,7 @@ Resources:
             - HEAD
             - OPTIONS
           ForwardedValues:
-            QueryString: false
+            QueryString: 'true'
           TargetOriginId: s3-website
           ViewerProtocolPolicy : redirect-to-https
           LambdaFunctionAssociations:
@@ -95,7 +95,7 @@ Resources:
               EventType: viewer-request
               LambdaFunctionARN: !Ref BasicAuthFunction.Version
           ForwardedValues:
-            QueryString: 'false'
+            QueryString: true
             Headers:
               - "X-Frame-Options"
               - host
