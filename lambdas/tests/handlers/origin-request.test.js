@@ -18,7 +18,7 @@ const event = {
             "host": [
               {
                 "key": "Host",
-                "value": "d123.sites-test.cf.net"
+                "value": "o-owner-r-repo.sites-test.cf.net"
               }
             ],
             "user-agent": [
@@ -51,7 +51,7 @@ describe("The handler function", () => {
     it("returns a message", async () => {
       results = {
         Count: 1,
-        Items: [{ id: 'siteId', settings: { bucket_name: 'testBucket' }}],
+        Items: [{ id: 'o-owner-r-repo', settings: { bucket_name: 'testBucket' }}],
       };
     
       AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
