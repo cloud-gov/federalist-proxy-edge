@@ -24,11 +24,13 @@ const getSiteConfig = (params) => {
 };
 
 const getSiteQueryParams = (tableName, siteKey, siteKeyValue) => {
-  const expressionAttributeNames = {};
-  expressionAttributeNames[`#${siteKey}`] = siteKey;
+  const expressionAttributeNames = {
+    [`#${siteKey}`]: siteKey,
+  };
 
-  const expressionAttributeValues = {};
-  expressionAttributeValues[`:${siteKey}`] = siteKeyValue;
+  const expressionAttributeValues = {
+    [`:${siteKey}`]: siteKeyValue,
+  };
 
   return {
     TableName: tableName,

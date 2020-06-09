@@ -49,8 +49,7 @@ describe('viewerRequest', () => {
 
     const response = await viewerRequest(event);
 
-    expect(response.headers['x-forwarded-host'][0].key).to.equal('X-Forwarded-Host');
-    expect(response.headers['x-forwarded-host'][0].value).to.equal(event.Records[0].cf.request.headers.host[0].value);
+    expect(response.headers['x-forwarded-host']).to.eq(undefined);
   });
 
   it('non-preview site - no basic auth', async () => {
@@ -66,10 +65,7 @@ describe('viewerRequest', () => {
 
     const response = await viewerRequest(event);
 
-    // AMIR
-    // There may have been a bug here, wondering if callback was called multiple times before...
-    expect(response.headers['x-forwarded-host'][0].key).to.equal('X-Forwarded-Host');
-    expect(response.headers['x-forwarded-host'][0].value).to.equal(event.Records[0].cf.request.headers.host[0].value);
+    expect(response.headers['x-forwarded-host']).to.eq(undefined);
   });
 
   it("password req'd - not present in request", async () => {

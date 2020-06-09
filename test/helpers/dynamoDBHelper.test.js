@@ -89,8 +89,6 @@ describe('getSubdomain', () => {
 describe('getSiteQueryParams', () => {
   it('returns params', () => {
     const tableName = 'testTable';
-    // const owner = 'testOwner';
-    // const repository = 'testRepo';
     const siteKey = 'id';
     const siteKeyValue = 'site-key';
 

@@ -63,10 +63,6 @@ const viewerRequest = async (event) => {
     return request;
   }
 
-  request.headers['x-forwarded-host'] = [
-    { key: 'X-Forwarded-Host', value: request.headers.host[0].value },
-  ];
-
   const subdomain = getSubdomain(request);
 
   const siteQueryParams = getSiteQueryParams('federalist-proxy-dev', siteKey, subdomain);
@@ -78,6 +74,10 @@ const viewerRequest = async (event) => {
       if (!credentials) {
         return request;
       }
+
+      request.headers['x-forwarded-host'] = [
+        { key: 'X-Forwarded-Host', value: request.headers.host[0].value },
+      ];
 
       const { username, password } = credentials;
 
