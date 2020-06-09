@@ -7,12 +7,13 @@ const mocks = {
 };
 
 AWS.DynamoDB.DocumentClient = function mock() {};
-AWS.DynamoDB.DocumentClient.prototype.query = (params, cb) => {
-  if (mocks.DynamoDB.DocumentClient.query) {
-    mocks.DynamoDB.DocumentClient.query(params, cb);
-    return;
-  }
-  cb(null, {})
+AWS.DynamoDB.DocumentClient.prototype.query = {
+  promise: async (params) => {
+    if (mocks.DynamoDB.DocumentClient.query) {
+      return mocks.DynamoDB.DocumentClient.query(params);
+    }
+    return {};
+  },
 };
 
 const resetMocks = () => {

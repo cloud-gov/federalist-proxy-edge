@@ -1,19 +1,12 @@
 {
-  "name": "federalist-proxy-edge",
+  "name": "federalist-proxy-edge-lambdas",
   "version": "1.0.0",
-  "description": "Lambda@Edge implementation of Federalist proxy server",
+  "description": "Lambda functions",
   "main": "app.js",
   "repository": "https://github.com/18F/federalist-proxy-edge",
   "author": "Amir Reavis-Bey",
-  "license": "MIT",
-  "dependencies": {},
-  "scripts": {
-    "test": "mocha tests/**/*.js"
-  },
+  "license": "CC0-1.0",
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
-    "mocha": "^6.1.4",
     "aws-sdk": "^2.642.0"
   }
 }
