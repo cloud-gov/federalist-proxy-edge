@@ -1,5 +1,5 @@
 'use strict';
-const { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain } = require ("./helpers/dynamoDBHelper");
+const { getSiteConfig, getSiteQueryParams, parseURI, getSiteIdFromRequest } = require ("./helpers/dynamoDBHelper");
 const site_key = 'id';
 
 const origin_request = (event, context, callback) => {
@@ -12,9 +12,9 @@ const origin_request = (event, context, callback) => {
     * if true, sets S3 origin properties.
     */
 
-  const subdomain = getSubdomain(request);
+  const siteId = getSiteIdFromRequest(request);
 
-    const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
+    const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, siteId);
       getSiteConfig(siteQueryParams)
         .then((siteConfig) => {
           const bucket = siteConfig['bucket_name'];
@@ -81,9 +81,9 @@ const viewer_request = (event, context, callback) => {
   ];
 
 
-  const subdomain = getSubdomain(request);
+  const siteId = getSiteIdFromRequest(request);
   
-  const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, subdomain);
+  const siteQueryParams = getSiteQueryParams("federalist-proxy-dev", site_key, siteId);
   
   getSiteConfig(siteQueryParams)
     .then((siteConfig) => {

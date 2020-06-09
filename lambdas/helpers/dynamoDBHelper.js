@@ -3,13 +3,14 @@ const AWS = require("aws-sdk");
 const getSiteConfig = (params) => new Promise((resolve, reject) => {
 
   const docClient = new AWS.DynamoDB.DocumentClient({ httpOptions: { connectTimeout: 120000, timeout: 120000 }});
+  console.log(`\nQuery params:\t(${JSON.stringify(params)})\n`);
   docClient.query(params, function(err, data) {
     if (err) {
       reject("Unable to query. Error:", JSON.stringify(err, null, 2));
     } else {
       if (data.Count > 0){
         data.Items.forEach(function(item) {
-          console.log(`\nQuery succeeded: item found @id:${JSON.stringify(item.id)}\n`);
+          console.log(`\nQuery succeeded: item found @id:${item.id}\n`);
           const settings = item.settings;
           resolve(settings);
         });
@@ -50,6 +51,6 @@ const parseURI = (request) => {
   return { owner, repository, siteType, branch }
 }
 
-const getSubdomain = (request) => request.headers['host'][0].value.split('.')[0];
+const getSiteIdFromRequest = (request) => request.headers['host'][0].value.split('.').slice(0, -3).join('.');
 
-module.exports = { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain };
+module.exports = { getSiteConfig, getSiteQueryParams, parseURI, getSiteIdFromRequest };

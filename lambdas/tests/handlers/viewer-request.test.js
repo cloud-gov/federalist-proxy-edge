@@ -30,7 +30,7 @@ describe("The handler function", () => {
                 "host": [
                   {
                     "key": "Host",
-                    "value": "d123.cf.net"
+                    "value": "d123.sites-test.cf.net"
                   }
                 ],
               }
@@ -45,7 +45,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: {} }],
+      Items: [{ id: 'siteId', settings: {} }],
     };
   
     AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
@@ -65,7 +65,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: { username, password }}}],
+      Items: [{ id: 'siteId', settings: { basic_auth: { username, password }}}],
     };
 
     const response = await lambdaHandler(event, undefined);
@@ -80,7 +80,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: { username, password }}}],
+      Items: [{ id: 'siteId', settings: { basic_auth: { username, password }}}],
     };
   
     AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
@@ -109,7 +109,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: { username, password }}}],
+      Items: [{ id: 'siteId', settings: { basic_auth: { username, password }}}],
     };
   
     AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
@@ -134,7 +134,7 @@ describe("The handler function", () => {
     const password = 'testPassword';
     const queryResults = {
       Count: 1,
-      Items: [{ settings: { basic_auth: { username, password }}}],
+      Items: [{ id: 'siteId', settings: { basic_auth: { username, password }}}],
     };
   
     AWSMocks.mocks.DynamoDB.DocumentClient.query = ({}, callback) => {
