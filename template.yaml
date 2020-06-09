@@ -81,7 +81,7 @@ Resources:
             - HEAD
             - OPTIONS
           ForwardedValues:
-            QueryString: false
+            QueryString: 'true'
           TargetOriginId: s3-website
           ViewerProtocolPolicy : redirect-to-https
           LambdaFunctionAssociations:
