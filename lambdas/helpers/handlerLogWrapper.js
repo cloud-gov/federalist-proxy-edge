@@ -1,7 +1,7 @@
 const log = require('./logger');
 
 module.exports = function handlerLogWrapper(name, fn) {
-  return (event, context) => {
+  return async (event, context) => {
     log(`${name} event:\t${JSON.stringify(event)}\n`);
     log(`${name} (in):\t${JSON.stringify(event.Records[0].cf.request)}\n`);
     return fn(event, context)

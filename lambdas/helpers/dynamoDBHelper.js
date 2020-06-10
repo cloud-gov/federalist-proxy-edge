@@ -2,7 +2,7 @@
 const AWS = require('aws-sdk');
 const log = require('./logger');
 
-const getSiteConfig = (params) => {
+const getSiteConfig = async (params) => {
   const docClient = new AWS.DynamoDB.DocumentClient({
     httpOptions: { connectTimeout: 120000, timeout: 120000 },
   });
