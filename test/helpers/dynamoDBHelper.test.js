@@ -44,7 +44,9 @@ describe('getSiteConfig', () => {
 
     stubDocDBQuery(() => { throw new Error('test error'); });
 
-    return expect(getSiteConfig(params)).to.eventually.be.rejected;
+    const err = await getSiteConfig(params).catch((e) => e);
+
+    expect(err).to.be.a('error');
   });
 });
 

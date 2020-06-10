@@ -9,12 +9,11 @@
   "scripts": {
     "lint": "eslint lambdas/**/*.js test/**/*.js",
     "lint:fix": "eslint --fix lambdas/**/*.js test/**/*.js",
-    "test": "NODE_ENV=TEST mocha --recursive -r test/bootstrap.js"
+    "test": "NODE_ENV=TEST mocha --recursive"
   },
   "devDependencies": {
     "aws-sdk": "^2.642.0",
     "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.21.1",
