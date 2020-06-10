@@ -9,6 +9,7 @@ function stubDocDBQuery(fn) {
       }),
     });
 }
+
 module.exports = {
   stubDocDBQuery,
 };
