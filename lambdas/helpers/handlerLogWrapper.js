@@ -1,4 +1,4 @@
-const { log } = console;
+const log = require('./logger');
 
 module.exports = function handlerLogWrapper(name, fn) {
   return (event, context) => {

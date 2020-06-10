@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "eslint lambdas/**/*.js test/**/*.js",
     "lint:fix": "eslint --fix lambdas/**/*.js test/**/*.js",
-    "test": "mocha --recursive -r test/bootstrap.js"
+    "test": "NODE_ENV=TEST mocha --recursive -r test/bootstrap.js"
   },
   "devDependencies": {
     "aws-sdk": "^2.642.0",

@@ -1,7 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const AWS = require('aws-sdk');
-
-const { log } = console;
+const log = require('./logger');
 
 const getSiteConfig = (params) => {
   const docClient = new AWS.DynamoDB.DocumentClient({
