@@ -49,7 +49,7 @@ const parseURI = (request) => {
   };
 };
 
-const getSubdomain = (request) => request.headers.host[0].value.split('.')[0];
+const getSubdomain = request => request.headers.host[0].value.split('.')[0];
 
 module.exports = {
   getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,

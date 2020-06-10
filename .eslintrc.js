@@ -15,5 +15,6 @@ module.exports = {
     'mocha',
   ],
   rules: {
+    'arrow-parens': [2, 'as-needed', { requireForBlockBody: true }],
   },
 };
