@@ -1,55 +1,56 @@
-const AWS = require("aws-sdk");
+// eslint-disable-next-line import/no-extraneous-dependencies
+const AWS = require('aws-sdk');
+const log = require('./logger');
 
-const getSiteConfig = (params) => new Promise((resolve, reject) => {
-
-  const docClient = new AWS.DynamoDB.DocumentClient({ httpOptions: { connectTimeout: 120000, timeout: 120000 }});
-  docClient.query(params, function(err, data) {
-    if (err) {
-      reject("Unable to query. Error:", JSON.stringify(err, null, 2));
-    } else {
-      if (data.Count > 0){
-        data.Items.forEach(function(item) {
-          console.log(`\nQuery succeeded: item found @id:${JSON.stringify(item.id)}\n`);
-          const settings = item.settings;
-          resolve(settings);
-        });
-      } else {
-        console.log(`\nQuery succeeded: no results found!!\n`);
-        resolve();
-      }
-    }
+const getSiteConfig = async (params) => {
+  const docClient = new AWS.DynamoDB.DocumentClient({
+    httpOptions: { connectTimeout: 120000, timeout: 120000 },
   });
-});
+  return docClient.query(params)
+    .promise()
+    .catch((err) => {
+      throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
+    })
+    .then(({ Count, Items }) => {
+      if (Count > 0) {
+        const [item] = Items;
+        log(`\nQuery succeeded: item found @id:${JSON.stringify(item.id)}\n`);
+        return item.settings;
+      }
+      log('\nQuery succeeded: no results found!!\n');
+      return undefined;
+    });
+};
 
-const getSiteQueryParams = (tableName, site_key, site_key_value) => {
-  const expressionAttributeNames = {};
-  expressionAttributeNames[`\#${site_key}`] = site_key;
+const getSiteQueryParams = (tableName, siteKey, siteKeyValue) => {
+  const expressionAttributeNames = {
+    [`#${siteKey}`]: siteKey,
+  };
 
-  const expressionAttributeValues = {};
-  expressionAttributeValues[`\:${site_key}`] = site_key_value;
+  const expressionAttributeValues = {
+    [`:${siteKey}`]: siteKeyValue,
+  };
 
   return {
     TableName: tableName,
-    KeyConditionExpression: `\#${site_key} = \:${site_key}`,
+    KeyConditionExpression: `#${siteKey} = :${siteKey}`,
     ExpressionAttributeNames: expressionAttributeNames,
     ExpressionAttributeValues: expressionAttributeValues,
   };
-}
+};
 
 const parseURI = (request) => {
-  const atts = request.uri.split("/");
-  const siteType = atts[1];
-  const owner = atts[2];
-  const repository = atts[3];
-  const subdomain = atts[0].split('.')[0];
+  const [, siteType, owner, repository, branch] = request.uri.split('/');
+  return {
+    owner,
+    repository,
+    siteType,
+    branch: siteType === 'preview' ? branch : null,
+  };
+};
 
-  let branch = null;
-  if (siteType === 'preview') {
-    branch = atts[4];
-  }
-  return { owner, repository, siteType, branch }
-}
+const getSubdomain = request => request.headers.host[0].value.split('.')[0];
 
-const getSubdomain = (request) => request.headers['host'][0].value.split('.')[0];
-
-module.exports = { getSiteConfig, getSiteQueryParams, parseURI, getSubdomain };
+module.exports = {
+  getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,
+};

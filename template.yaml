@@ -26,7 +26,7 @@ Resources:
     Properties:
       FunctionName: !Sub "fed-proxy-${StackEnv}-basic-auth"
       CodeUri: lambdas/
-      Handler: app.viewer_request
+      Handler: app.viewerRequest
       Runtime: nodejs12.x
       AutoPublishAlias: live
       Policies: AmazonDynamoDBReadOnlyAccess
@@ -36,7 +36,7 @@ Resources:
     Properties:
       FunctionName: !Sub "fed-proxy-${StackEnv}-origin-request"
       CodeUri: lambdas/
-      Handler: app.origin_request
+      Handler: app.originRequest
       Runtime: nodejs12.x
       AutoPublishAlias: live
       Policies: AmazonDynamoDBReadOnlyAccess
@@ -46,7 +46,7 @@ Resources:
     Properties:
       FunctionName: !Sub "fed-proxy-${StackEnv}-origin-response"
       CodeUri: lambdas/
-      Handler: app.origin_response
+      Handler: app.originResponse
       Runtime: nodejs12.x
       AutoPublishAlias: live
 
