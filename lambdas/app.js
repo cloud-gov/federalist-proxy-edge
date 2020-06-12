@@ -15,7 +15,7 @@ const originRequest = async (event) => {
 
   const subdomain = getSubdomain(request);
 
-  const siteQueryParams = getSiteQueryParams('federalist-proxy-dev', siteKey, subdomain);
+  const siteQueryParams = getSiteQueryParams('federalist-proxy-staging', siteKey, subdomain);
 
   return getSiteConfig(siteQueryParams)
     .then((siteConfig) => {
@@ -65,7 +65,7 @@ const viewerRequest = async (event) => {
 
   const subdomain = getSubdomain(request);
 
-  const siteQueryParams = getSiteQueryParams('federalist-proxy-dev', siteKey, subdomain);
+  const siteQueryParams = getSiteQueryParams('federalist-proxy-staging', siteKey, subdomain);
 
   return getSiteConfig(siteQueryParams)
     .then((siteConfig) => {
