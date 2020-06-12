@@ -6,7 +6,7 @@ stack_name = "fed-proxy-staging"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1gm71w3b8vaj5"
 s3_prefix = "fed-proxy-staging"
 region = "us-east-1"
-confirm_changeset = true
+confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "StackEnv=\"staging\""
 
