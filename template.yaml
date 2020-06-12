@@ -13,9 +13,8 @@ Globals:
 Parameters:
   StackEnv:
     Type: String
-    Default: dev
-    AllowedValues: 
-      - dev
+    Default: staging
+    AllowedValues:
       - staging
       - prod
     Description: stack environemnt
