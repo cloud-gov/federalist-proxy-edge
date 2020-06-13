@@ -1,11 +1,11 @@
 const handlerLogWrapper = require('./helpers/handlerLogWrapper');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,
+  getSiteConfig, parseURI,
 } = require('./helpers/dynamoDBHelper');
 
-const siteKey = 'id';
+const getHost = request => request.headers.host[0].value;
 
-const originRequest = async (event) => {
+const originRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
 
   /**
@@ -13,11 +13,7 @@ const originRequest = async (event) => {
     * if true, sets S3 origin properties.
     */
 
-  const subdomain = getSubdomain(request);
-
-  const siteQueryParams = getSiteQueryParams('federalist-proxy-staging', siteKey, subdomain);
-
-  return getSiteConfig(siteQueryParams)
+  return getSiteConfig(host, context.functionName)
     .then((siteConfig) => {
       const { bucket_name: bucket } = siteConfig;
 
@@ -56,18 +52,14 @@ const originResponse = async (event) => {
 // https://stackoverflow.com/questions/28449363/why-is-this-http-request-not-working-on-aws-lambda
 
 
-const viewerRequest = async (event) => {
+const viewerRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
 
   if (parseURI(request).siteType !== 'preview') {
     return request;
   }
 
-  const subdomain = getSubdomain(request);
-
-  const siteQueryParams = getSiteQueryParams('federalist-proxy-staging', siteKey, subdomain);
-
-  return getSiteConfig(siteQueryParams)
+  return getSiteConfig(host, context.functionName)
     .then((siteConfig) => {
       const { basic_auth: credentials } = siteConfig;
 

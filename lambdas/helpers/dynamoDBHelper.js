@@ -2,7 +2,8 @@
 const AWS = require('aws-sdk');
 const log = require('./logger');
 
-const getSiteConfig = async (params) => {
+const getSiteConfig = async (host, functionName) => {
+  const params = getSiteQueryParams(host, functionName);
   const docClient = new AWS.DynamoDB.DocumentClient({
     httpOptions: { connectTimeout: 120000, timeout: 120000 },
   });
@@ -22,7 +23,11 @@ const getSiteConfig = async (params) => {
     });
 };
 
-const getSiteQueryParams = (tableName, siteKey, siteKeyValue) => {
+const getSiteQueryParams = (host, functionName) => {
+  const siteKey = 'id';
+  const tableName = getTableName(functionName);
+  const siteKeyValue = getSiteKeyValue(host, functionName);
+
   const expressionAttributeNames = {
     [`#${siteKey}`]: siteKey,
   };
@@ -49,8 +54,54 @@ const parseURI = (request) => {
   };
 };
 
-const getSubdomain = request => request.headers.host[0].value.split('.')[0];
+const getAppEnv = (functionName) => {
+  let appEnv;
+  if  (validateProxyFunctionName(functionName)) {
+    if (/staging/.test(functionName)) {
+      appEnv = 'staging';
+    }
+    if (/prod/.test(functionName)) {
+      appEnv = 'prod';
+    }
+  }
+  return appEnv;
+}
+
+const validateProxyFunctionName = functionName => 
+  /^(us|af|ap|ca|cn|eu|me|sa)\-(gov\-|north|south)?(east|west)\-\d+\:federalist\-proxy\-(prod|staging)\-(viewer|origin)-(request|response):\d+$/.test(functionName);
+
+const getDomain = (functionName) => {
+  let domain;
+  const appEnv = getAppEnv(functionName);
+  if appEnv === 'staging' {
+    domain = 'sites-staging.federalist.18f.gov';
+  }
+  if appEnv === 'prod' {
+    domain = 'sites-prod.federalist.18f.gov';
+  }
+  return tableName;
+}
+
+const getSiteKeyValue = (host, functionName) => {
+  let siteKeyValue;
+  let domain = getDomain(functionName);
+  if (host.endsWith(domain)) {
+    siteKeyValue = host.replace(new RegExp('\.' + domain + '$'), '');
+  }
+  return siteKeyValue;
+}
+
+const getTableName = functionName => {
+  let tableName;
+  const appEnv = getAppEnv(functionName);
+  if appEnv === 'staging' {
+    tableName = 'federalist-proxy-staging';
+  } else if appEnv === 'prod' {
+    tableName = 'federalist-proxy-prod'
+  }
+  return tableName;
+}
 
 module.exports = {
-  getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,
+  getSiteConfig, parseURI,
 };
