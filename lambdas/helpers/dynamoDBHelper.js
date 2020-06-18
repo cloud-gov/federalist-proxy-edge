@@ -2,8 +2,28 @@
 const AWS = require('aws-sdk');
 const log = require('./logger');
 
-const getSiteConfig = async (host, functionName) => {
-  const params = getSiteQueryParams(host, functionName);
+const testConfig = {
+  appEnv: 'test',
+  domain:'sites-test.federalist.18f.gov',
+  tableName: 'federalist-proxy-test',
+  siteKey: 'id',
+};
+
+const stagingConfig = {
+  appEnv: 'staging',
+  domain:'sites-staging.federalist.18f.gov',
+  tableName: 'federalist-proxy-staging',
+  siteKey: 'id',
+};
+
+const prodConfig = {
+  appEnv: 'production',
+  domain:'sites-prod.federalist.18f.gov',
+  tableName: 'federalist-proxy-prod',
+  siteKey: 'id',
+};
+
+const getSiteConfig = async (params) => {
   const docClient = new AWS.DynamoDB.DocumentClient({
     httpOptions: { connectTimeout: 120000, timeout: 120000 },
   });
@@ -24,9 +44,8 @@ const getSiteConfig = async (host, functionName) => {
 };
 
 const getSiteQueryParams = (host, functionName) => {
-  const siteKey = 'id';
-  const tableName = getTableName(functionName);
-  const siteKeyValue = getSiteKeyValue(host, functionName);
+  const { tableName, siteKey, domain } = getAppConfig(functionName);
+  const siteKeyValue = getSiteKeyValue(host, domain);
 
   const expressionAttributeNames = {
     [`#${siteKey}`]: siteKey,
@@ -54,54 +73,32 @@ const parseURI = (request) => {
   };
 };
 
-const getAppEnv = (functionName) => {
-  let appEnv;
+const getAppConfig = (functionName) => {
+  let appConfig = {};
   if  (validateProxyFunctionName(functionName)) {
     if (/staging/.test(functionName)) {
-      appEnv = 'staging';
-    }
-    if (/prod/.test(functionName)) {
-      appEnv = 'prod';
+      appConfig = stagingConfig;
+    } else if (/prod/.test(functionName)) {
+      appConfig = prodConfig
+    } else if (/test/.test(functionName)) {
+      appConfig = testConfig
     }
   }
-  return appEnv;
+  return appConfig;
 }
 
 const validateProxyFunctionName = functionName => 
-  /^(us|af|ap|ca|cn|eu|me|sa)\-(gov\-|north|south)?(east|west)\-\d+\:federalist\-proxy\-(prod|staging)\-(viewer|origin)-(request|response):\d+$/.test(functionName);
+  /^us-east-1\:federalist\-proxy\-(prod|staging|test)\-(viewer|origin)-(request|response):\d+$/.test(functionName);
 
-const getDomain = (functionName) => {
-  let domain;
-  const appEnv = getAppEnv(functionName);
-  if appEnv === 'staging' {
-    domain = 'sites-staging.federalist.18f.gov';
-  }
-  if appEnv === 'prod' {
-    domain = 'sites-prod.federalist.18f.gov';
-  }
-  return tableName;
-}
 
-const getSiteKeyValue = (host, functionName) => {
+const getSiteKeyValue = (host, appDomain) => {
   let siteKeyValue;
-  let domain = getDomain(functionName);
-  if (host.endsWith(domain)) {
-    siteKeyValue = host.replace(new RegExp('\.' + domain + '$'), '');
+  if (host.endsWith(appDomain)) {
+    siteKeyValue = host.replace(new RegExp('\.' + appDomain + '$'), '');
   }
   return siteKeyValue;
 }
 
-const getTableName = functionName => {
-  let tableName;
-  const appEnv = getAppEnv(functionName);
-  if appEnv === 'staging' {
-    tableName = 'federalist-proxy-staging';
-  } else if appEnv === 'prod' {
-    tableName = 'federalist-proxy-prod'
-  }
-  return tableName;
-}
-
 module.exports = {
-  getSiteConfig, parseURI,
+  getSiteConfig, parseURI, getSiteQueryParams, getSiteKeyValue,
 };

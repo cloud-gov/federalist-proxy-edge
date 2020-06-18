@@ -1,9 +1,10 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { stubDocDBQuery } = require('../support');
+const { stubDocDBQuery, event, getContext } = require('../support');
 
 const { viewerRequest } = require('../../lambdas/app');
 
+const context = getContext('viewer-request');
 const userPass = (user, pw) => (`Basic ${Buffer.from(`${user}:${pw}`).toString('base64')}`);
 
 describe('viewerRequest', () => {
@@ -11,33 +12,6 @@ describe('viewerRequest', () => {
     sinon.restore();
   });
 
-  let event;
-  beforeEach(() => {
-    event = {
-      Records: [
-        {
-          cf: {
-            config: {
-              distributionId: 'EXAMPLE',
-            },
-            request: {
-              uri: '/preview/testOwner/testRepo/testBranch/index.html',
-              method: 'GET',
-              clientIp: '2001:cdba::3257:9652',
-              headers: {
-                host: [
-                  {
-                    key: 'Host',
-                    value: 'd123.cf.net',
-                  },
-                ],
-              },
-            },
-          },
-        },
-      ],
-    };
-  });
 
   it('basic auth disabled', async () => {
     const queryResults = {
@@ -46,14 +20,12 @@ describe('viewerRequest', () => {
     };
 
     stubDocDBQuery(() => queryResults);
-
-    const response = await viewerRequest(event);
+    const response = await viewerRequest(event, context);
 
     expect(response.headers['x-forwarded-host']).to.eq(undefined);
   });
 
   it('non-preview site - no basic auth', async () => {
-    event.Records[0].cf.request.uri = '/site/testOwner/testRepo/index.html';
     const username = 'testUser';
     const password = 'testPassword';
     const queryResults = {
@@ -63,7 +35,7 @@ describe('viewerRequest', () => {
 
     stubDocDBQuery(() => queryResults);
 
-    const response = await viewerRequest(event);
+    const response = await viewerRequest(event, context);
 
     expect(response.headers['x-forwarded-host']).to.eq(undefined);
   });
@@ -75,10 +47,10 @@ describe('viewerRequest', () => {
       Count: 1,
       Items: [{ settings: { basic_auth: { username, password } } }],
     };
-
+    const authEvent = { ...event };
+    authEvent.Records[0].cf.request.uri = '/preview/owner/repo/branch/index.html';
     stubDocDBQuery(() => queryResults);
-
-    const response = await viewerRequest(event);
+    const response = await viewerRequest(authEvent, context);
 
     expect(response).to.deep.equal({
       status: '401',
@@ -111,7 +83,7 @@ describe('viewerRequest', () => {
       value: userPass(username, password),
     }];
 
-    const response = await viewerRequest(authEvent);
+    const response = await viewerRequest(authEvent, context);
 
     expect(response.headers['x-forwarded-host'][0].key).to.equal('X-Forwarded-Host');
     expect(response.headers['x-forwarded-host'][0].value).to.equal(event.Records[0].cf.request.headers.host[0].value);
@@ -133,7 +105,7 @@ describe('viewerRequest', () => {
       value: 'invalidUserPassword',
     }];
 
-    const response = await viewerRequest(authEvent);
+    const response = await viewerRequest(authEvent, context);
 
     expect(response).to.deep.equal({
       status: '401',

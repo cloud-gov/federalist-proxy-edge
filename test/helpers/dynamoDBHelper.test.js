@@ -1,9 +1,8 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { stubDocDBQuery } = require('../support');
-
+const { stubDocDBQuery, host, getContext } = require('../support');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,
+  getSiteConfig, getSiteQueryParams, parseURI, getSiteKeyValue,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSiteConfig', () => {
@@ -72,39 +71,36 @@ describe('parseURI', () => {
   });
 });
 
-describe('getSubdomain', () => {
-  it('fetches subdomain', () => {
-    const request = {
-      headers: {
-        host: [
-          {
-            key: 'Host',
-            value: 'subdomain.example.gov',
-          },
-        ],
-      },
-    };
-    expect(getSubdomain(request)).to.equal('subdomain');
+describe('getSiteKeyValue', () => {
+  it('fetches siteKey w/o periods', () => {
+    const siteKey = 'thisIsIt';
+    const host = `${siteKey}.sites-test.federalist.18f.gov`;
+    const domain = 'sites-test.federalist.18f.gov';
+    expect(getSiteKeyValue(host, domain)).to.equal(siteKey);
+  });
+
+  it('fetches siteKey w/ periods', () => {
+    const siteKey = 'this.is.it.sites-test';
+    const host = `${siteKey}.sites-test.federalist.18f.gov`;
+    const domain = 'sites-test.federalist.18f.gov';
+    expect(getSiteKeyValue(host, domain)).to.equal(siteKey);
   });
 });
 
 describe('getSiteQueryParams', () => {
   it('returns params', () => {
-    const tableName = 'testTable';
-    const siteKey = 'id';
-    const siteKeyValue = 'site-key';
-
     const expectedParams = {
-      TableName: 'testTable',
+      TableName: 'federalist-proxy-test',
       KeyConditionExpression: '#id = :id',
       ExpressionAttributeNames:
         {
           '#id': 'id',
         },
       ExpressionAttributeValues: {
-        ':id': 'site-key',
+        ':id': 'o-owner-r-repo',
       },
     };
-    expect(getSiteQueryParams(tableName, siteKey, siteKeyValue)).to.deep.equal(expectedParams);
+    const context = getContext('viewer-request');
+    expect(getSiteQueryParams(host, context.functionName)).to.deep.equal(expectedParams);
   });
 });

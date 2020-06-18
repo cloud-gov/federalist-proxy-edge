@@ -1,6 +1,6 @@
 const handlerLogWrapper = require('./helpers/handlerLogWrapper');
 const {
-  getSiteConfig, parseURI,
+  getSiteConfig, parseURI, getSiteQueryParams
 } = require('./helpers/dynamoDBHelper');
 
 const getHost = request => request.headers.host[0].value;
@@ -12,8 +12,9 @@ const originRequest = async (event, context) => {
     * Reads query string to check if S3 origin should be used, and
     * if true, sets S3 origin properties.
     */
-
-  return getSiteConfig(host, context.functionName)
+  const host = getHost(request);
+  const params = getSiteQueryParams(host, context.functionName);
+  return getSiteConfig(params)
     .then((siteConfig) => {
       const { bucket_name: bucket } = siteConfig;
 
@@ -59,7 +60,9 @@ const viewerRequest = async (event, context) => {
     return request;
   }
 
-  return getSiteConfig(host, context.functionName)
+  const host = getHost(request);
+  const params = getSiteQueryParams(host, context.functionName);
+  return getSiteConfig(params)
     .then((siteConfig) => {
       const { basic_auth: credentials } = siteConfig;
 
