@@ -100,5 +100,5 @@ const getSiteKeyValue = (host, appDomain) => {
 }
 
 module.exports = {
-  getSiteConfig, parseURI, getSiteQueryParams, getSiteKeyValue,
+  getSiteConfig, parseURI, getSiteQueryParams, getSiteKeyValue, getAppConfig,
 };

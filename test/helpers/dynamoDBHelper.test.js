@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { stubDocDBQuery, host, getContext } = require('../support');
+const { stubDocDBQuery, host, getContext, } = require('../support');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, getSiteKeyValue,
+  getSiteConfig, getSiteQueryParams, parseURI, getSiteKeyValue, getAppConfig,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSiteConfig', () => {
@@ -102,5 +102,37 @@ describe('getSiteQueryParams', () => {
     };
     const context = getContext('viewer-request');
     expect(getSiteQueryParams(host, context.functionName)).to.deep.equal(expectedParams);
+  });
+});
+
+describe('getAppConfig', () => {
+  it('get test', () => {
+    const context = getContext('viewer-request');
+    expect(getAppConfig(context.functionName)).to.deep.equal({
+      appEnv: 'test',
+      domain:'sites-test.federalist.18f.gov',
+      tableName: 'federalist-proxy-test',
+      siteKey: 'id',
+    });
+  });
+
+  it('get staging', () => {
+    const context = getContext('viewer-request');
+    expect(getAppConfig(context.functionName.replace('test', 'staging'))).to.deep.equal({
+      appEnv: 'staging',
+      domain:'sites-staging.federalist.18f.gov',
+      tableName: 'federalist-proxy-staging',
+      siteKey: 'id',
+    });
+  });
+
+  it('get prod', () => {
+    const context = getContext('viewer-request');
+    expect(getAppConfig(context.functionName.replace('test', 'prod'))).to.deep.equal({
+      appEnv: 'production',
+      domain:'sites-prod.federalist.18f.gov',
+      tableName: 'federalist-proxy-prod',
+      siteKey: 'id',
+    });
   });
 });
