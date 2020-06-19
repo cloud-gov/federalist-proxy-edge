@@ -43,9 +43,8 @@ const getSiteConfig = async (params) => {
     });
 };
 
-const validateProxyFunctionName = functionName =>
-  /^us-east-1:federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response):\d+$/
-    .test(functionName);
+const validateProxyFunctionName = functionName => /^us-east-1:federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response):\d+$/
+  .test(functionName);
 
 const getAppConfig = (functionName) => {
   let appConfig = {};
