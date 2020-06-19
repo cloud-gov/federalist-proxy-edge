@@ -71,10 +71,10 @@ const getSiteQueryParams = (host, functionName) => {
   const { tableName, siteKey, domain } = getAppConfig(functionName);
   const siteKeyValue = getSiteKeyValue(host, domain);
   return {
-    TableName : tableName,
+    TableName: tableName,
     Key: {
-      [siteKey]: siteKeyValue
-    }
+      [siteKey]: siteKeyValue,
+    },
   };
 };
 
