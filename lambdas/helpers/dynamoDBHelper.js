@@ -27,16 +27,15 @@ const getSiteConfig = async (params) => {
   const docClient = new AWS.DynamoDB.DocumentClient({
     httpOptions: { connectTimeout: 120000, timeout: 120000 },
   });
-  return docClient.query(params)
+  return docClient.get(params)
     .promise()
     .catch((err) => {
       throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
     })
-    .then(({ Count, Items }) => {
-      if (Count > 0) {
-        const [item] = Items;
-        log(`\nQuery succeeded: item found @id:${JSON.stringify(item.id)}\n`);
-        return item.settings;
+    .then(({ Item }) => {
+      if (Item) {
+        log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.id)}\n`);
+        return Item.settings;
       }
       log('\nQuery succeeded: no results found!!\n');
       return undefined;
@@ -71,20 +70,11 @@ const getSiteKeyValue = (host, appDomain) => {
 const getSiteQueryParams = (host, functionName) => {
   const { tableName, siteKey, domain } = getAppConfig(functionName);
   const siteKeyValue = getSiteKeyValue(host, domain);
-
-  const expressionAttributeNames = {
-    [`#${siteKey}`]: siteKey,
-  };
-
-  const expressionAttributeValues = {
-    [`:${siteKey}`]: siteKeyValue,
-  };
-
   return {
-    TableName: tableName,
-    KeyConditionExpression: `#${siteKey} = :${siteKey}`,
-    ExpressionAttributeNames: expressionAttributeNames,
-    ExpressionAttributeValues: expressionAttributeValues,
+    TableName : tableName,
+    Key: {
+      [siteKey]: siteKeyValue
+    }
   };
 };
 

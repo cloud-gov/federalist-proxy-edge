@@ -15,8 +15,7 @@ describe('viewerRequest', () => {
 
   it('basic auth disabled', async () => {
     const queryResults = {
-      Count: 1,
-      Items: [{ settings: {} }],
+      Item: { settings: {} },
     };
 
     stubDocDBQuery(() => queryResults);
@@ -29,8 +28,7 @@ describe('viewerRequest', () => {
     const username = 'testUser';
     const password = 'testPassword';
     const queryResults = {
-      Count: 1,
-      Items: [{ settings: { basic_auth: { username, password } } }],
+      Item: { settings: { basic_auth: { username, password } } },
     };
 
     stubDocDBQuery(() => queryResults);
@@ -44,8 +42,7 @@ describe('viewerRequest', () => {
     const username = 'testUser';
     const password = 'testPassword';
     const queryResults = {
-      Count: 1,
-      Items: [{ settings: { basic_auth: { username, password } } }],
+      Item: { settings: { basic_auth: { username, password } } },
     };
     const authEvent = getRequestEvent();
     authEvent.Records[0].cf.request.uri = '/preview/owner/repo/branch/index.html';
@@ -71,8 +68,7 @@ describe('viewerRequest', () => {
     const username = 'testUser';
     const password = 'testPassword';
     const queryResults = {
-      Count: 1,
-      Items: [{ settings: { basic_auth: { username, password } } }],
+      Item: { settings: { basic_auth: { username, password } } },
     };
 
     stubDocDBQuery(() => queryResults);
@@ -98,8 +94,7 @@ describe('viewerRequest', () => {
     const username = 'testUser';
     const password = 'testPassword';
     const queryResults = {
-      Count: 1,
-      Items: [{ settings: { basic_auth: { username, password } } }],
+      Item: { settings: { basic_auth: { username, password } } },
     };
 
     stubDocDBQuery(() => queryResults);

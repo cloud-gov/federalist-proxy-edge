@@ -14,8 +14,7 @@ describe('getSiteConfig', () => {
     const params = {};
 
     const results = {
-      Count: 1,
-      Items: [{ settings: { bucket_name: 'testBucket' } }],
+      Item: { settings: { bucket_name: 'testBucket' } },
     };
 
     stubDocDBQuery(() => results);
@@ -27,10 +26,7 @@ describe('getSiteConfig', () => {
   it('does not fetch site config - not found', async () => {
     const params = {};
 
-    const results = {
-      Count: 0,
-      Items: [],
-    };
+    const results = {};
 
     stubDocDBQuery(() => results);
 
@@ -91,13 +87,8 @@ describe('getSiteQueryParams', () => {
   it('returns params', () => {
     const expectedParams = {
       TableName: 'federalist-proxy-test',
-      KeyConditionExpression: '#id = :id',
-      ExpressionAttributeNames:
-        {
-          '#id': 'id',
-        },
-      ExpressionAttributeValues: {
-        ':id': 'the.site.key',
+      Key: {
+        id: 'the.site.key',
       },
     };
     const context = getContext('viewer-request');

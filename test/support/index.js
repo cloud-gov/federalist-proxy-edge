@@ -4,7 +4,7 @@ const sinon = require('sinon');
 function stubDocDBQuery(fn) {
   return sinon.stub(AWS.DynamoDB, 'DocumentClient')
     .returns({
-      query: () => ({
+      get: () => ({
         promise: async () => fn(),
       }),
     });
