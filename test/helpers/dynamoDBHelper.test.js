@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { stubDocDBQuery, host, getContext, } = require('../support');
+const { stubDocDBQuery, getContext, } = require('../support');
 const {
   getSiteConfig, getSiteQueryParams, parseURI, getSiteKeyValue, getAppConfig,
 } = require('../../lambdas/helpers/dynamoDBHelper');
@@ -97,10 +97,11 @@ describe('getSiteQueryParams', () => {
           '#id': 'id',
         },
       ExpressionAttributeValues: {
-        ':id': 'o-owner-r-repo',
+        ':id': 'the.site.key',
       },
     };
     const context = getContext('viewer-request');
+    const host = `the.site.key.sites-test.federalist.18f.gov`;
     expect(getSiteQueryParams(host, context.functionName)).to.deep.equal(expectedParams);
   });
 });

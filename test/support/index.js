@@ -1,8 +1,6 @@
 const AWS = require('aws-sdk');
 const sinon = require('sinon');
 
-const host = 'o-owner-r-repo.sites-test.federalist.18f.gov';
-
 function stubDocDBQuery(fn) {
   return sinon.stub(AWS.DynamoDB, 'DocumentClient')
     .returns({
@@ -12,7 +10,7 @@ function stubDocDBQuery(fn) {
     });
 }
 
-const event = ({
+const getRequestEvent = () => ({
   Records: [
     {
       cf: {
@@ -27,7 +25,7 @@ const event = ({
             host: [
               {
                 key: 'Host',
-                value: host,
+                value: 'o-owner-r-repo.sites-test.federalist.18f.gov',
               },
             ],
             'user-agent': [
@@ -49,8 +47,22 @@ const event = ({
   ],
 });
 
+const getResponseEvent = () => ({
+  Records: [
+    {
+      cf: {
+        response: {
+          headers: {},
+          status: '200',
+          statusDescription: 'OK',
+        },
+      },
+    },
+  ],
+});
+
 const getContext = (eventType) => ({ functionName: `us-east-1:federalist-proxy-test-${eventType}:0`});
 
 module.exports = {
-  stubDocDBQuery, getContext, event, host
+  stubDocDBQuery, getContext, getRequestEvent, getResponseEvent,
 };

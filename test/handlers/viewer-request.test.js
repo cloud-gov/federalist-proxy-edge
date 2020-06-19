@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { stubDocDBQuery, event, getContext } = require('../support');
+const { stubDocDBQuery, getRequestEvent, getContext } = require('../support');
 
 const { viewerRequest } = require('../../lambdas/app');
 
@@ -20,7 +20,7 @@ describe('viewerRequest', () => {
     };
 
     stubDocDBQuery(() => queryResults);
-    const response = await viewerRequest(event, context);
+    const response = await viewerRequest(getRequestEvent(), context);
 
     expect(response.headers['x-forwarded-host']).to.eq(undefined);
   });
@@ -35,7 +35,7 @@ describe('viewerRequest', () => {
 
     stubDocDBQuery(() => queryResults);
 
-    const response = await viewerRequest(event, context);
+    const response = await viewerRequest(getRequestEvent(), context);
 
     expect(response.headers['x-forwarded-host']).to.eq(undefined);
   });
@@ -47,7 +47,7 @@ describe('viewerRequest', () => {
       Count: 1,
       Items: [{ settings: { basic_auth: { username, password } } }],
     };
-    const authEvent = { ...event };
+    const authEvent = getRequestEvent();
     authEvent.Records[0].cf.request.uri = '/preview/owner/repo/branch/index.html';
     stubDocDBQuery(() => queryResults);
     const response = await viewerRequest(authEvent, context);
@@ -77,16 +77,21 @@ describe('viewerRequest', () => {
 
     stubDocDBQuery(() => queryResults);
 
-    const authEvent = { ...event };
+    const authEvent = getRequestEvent();
     authEvent.Records[0].cf.request.headers.authorization = [{
       key: 'Authorization',
       value: userPass(username, password),
     }];
-
+    authEvent.Records[0].cf.request.headers['x-forwarded-host'] = [
+      {
+        key: 'X-Forwarded-Host',
+        value: authEvent.Records[0].cf.request.headers.host[0].value,
+      },
+    ];
     const response = await viewerRequest(authEvent, context);
 
     expect(response.headers['x-forwarded-host'][0].key).to.equal('X-Forwarded-Host');
-    expect(response.headers['x-forwarded-host'][0].value).to.equal(event.Records[0].cf.request.headers.host[0].value);
+    expect(response.headers['x-forwarded-host'][0].value).to.equal(authEvent.Records[0].cf.request.headers.host[0].value);
   });
 
   it("password req'd - invalid user password", async () => {
@@ -99,7 +104,8 @@ describe('viewerRequest', () => {
 
     stubDocDBQuery(() => queryResults);
 
-    const authEvent = { ...event };
+    const authEvent = getRequestEvent();
+    authEvent.Records[0].cf.request.uri = '/preview/owner/repo/branch/index.html';
     authEvent.Records[0].cf.request.headers.authorization = [{
       key: 'Authorization',
       value: 'invalidUserPassword',
