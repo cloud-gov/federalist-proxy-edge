@@ -4,21 +4,21 @@ const log = require('./logger');
 
 const testConfig = {
   appEnv: 'test',
-  domain:'sites-test.federalist.18f.gov',
+  domain: 'sites-test.federalist.18f.gov',
   tableName: 'federalist-proxy-test',
   siteKey: 'id',
 };
 
 const stagingConfig = {
   appEnv: 'staging',
-  domain:'sites-staging.federalist.18f.gov',
+  domain: 'sites-staging.federalist.18f.gov',
   tableName: 'federalist-proxy-staging',
   siteKey: 'id',
 };
 
 const prodConfig = {
   appEnv: 'production',
-  domain:'sites-prod.federalist.18f.gov',
+  domain: 'sites-prod.federalist.18f.gov',
   tableName: 'federalist-proxy-prod',
   siteKey: 'id',
 };
@@ -41,6 +41,32 @@ const getSiteConfig = async (params) => {
       log('\nQuery succeeded: no results found!!\n');
       return undefined;
     });
+};
+
+const validateProxyFunctionName = functionName =>
+  /^us-east-1:federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response):\d+$/
+    .test(functionName);
+
+const getAppConfig = (functionName) => {
+  let appConfig = {};
+  if (validateProxyFunctionName(functionName)) {
+    if (/staging/.test(functionName)) {
+      appConfig = stagingConfig;
+    } else if (/prod/.test(functionName)) {
+      appConfig = prodConfig;
+    } else if (/test/.test(functionName)) {
+      appConfig = testConfig;
+    }
+  }
+  return appConfig;
+};
+
+const getSiteKeyValue = (host, appDomain) => {
+  let siteKeyValue;
+  if (host.endsWith(appDomain)) {
+    siteKeyValue = host.replace(new RegExp(`.${appDomain}$`), '');
+  }
+  return siteKeyValue;
 };
 
 const getSiteQueryParams = (host, functionName) => {
@@ -72,32 +98,6 @@ const parseURI = (request) => {
     branch: siteType === 'preview' ? branch : null,
   };
 };
-
-const getAppConfig = (functionName) => {
-  let appConfig = {};
-  if  (validateProxyFunctionName(functionName)) {
-    if (/staging/.test(functionName)) {
-      appConfig = stagingConfig;
-    } else if (/prod/.test(functionName)) {
-      appConfig = prodConfig
-    } else if (/test/.test(functionName)) {
-      appConfig = testConfig
-    }
-  }
-  return appConfig;
-}
-
-const validateProxyFunctionName = functionName => 
-  /^us-east-1\:federalist\-proxy\-(prod|staging|test)\-(viewer|origin)-(request|response):\d+$/.test(functionName);
-
-
-const getSiteKeyValue = (host, appDomain) => {
-  let siteKeyValue;
-  if (host.endsWith(appDomain)) {
-    siteKeyValue = host.replace(new RegExp('\.' + appDomain + '$'), '');
-  }
-  return siteKeyValue;
-}
 
 module.exports = {
   getSiteConfig, parseURI, getSiteQueryParams, getSiteKeyValue, getAppConfig,

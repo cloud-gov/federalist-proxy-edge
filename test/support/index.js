@@ -61,7 +61,7 @@ const getResponseEvent = () => ({
   ],
 });
 
-const getContext = (eventType) => ({ functionName: `us-east-1:federalist-proxy-test-${eventType}:0`});
+const getContext = eventType => ({ functionName: `us-east-1:federalist-proxy-test-${eventType}:0` });
 
 module.exports = {
   stubDocDBQuery, getContext, getRequestEvent, getResponseEvent,
