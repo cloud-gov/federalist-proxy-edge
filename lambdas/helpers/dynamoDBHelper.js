@@ -52,17 +52,16 @@ const getAppConfig = (functionName) => {
   throw new Error(`Unable to find appConfig for @function: ${functionName}`);
 };
 
-const getSiteKeyValue = (host, appDomain) => {
-  let siteKeyValue;
+const stripSiteIdFromHost = (host, appDomain) => {
   if (host.endsWith(appDomain)) {
-    siteKeyValue = host.replace(new RegExp(`.${appDomain}$`), '');
+    return host.replace(new RegExp(`.${appDomain}$`), '');
   }
-  return siteKeyValue;
+  throw new Error(`Unable to strip siteId from @host: ${host}`);
 };
 
 const getSiteQueryParams = (host, functionName) => {
   const { tableName, siteKey, domain } = getAppConfig(functionName);
-  const siteKeyValue = getSiteKeyValue(host, domain);
+  const siteKeyValue = stripSiteIdFromHost(host, domain);
   return {
     TableName: tableName,
     Key: {
@@ -82,5 +81,5 @@ const parseURI = (request) => {
 };
 
 module.exports = {
-  getSiteConfig, parseURI, getSiteQueryParams, getSiteKeyValue, getAppConfig,
+  getSiteConfig, parseURI, getSiteQueryParams, stripSiteIdFromHost, getAppConfig,
 };

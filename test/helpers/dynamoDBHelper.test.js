@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, getSiteKeyValue, getAppConfig,
+  getSiteConfig, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSiteConfig', () => {
@@ -67,21 +67,29 @@ describe('parseURI', () => {
   });
 });
 
-describe('getSiteKeyValue', () => {
+describe('stripSiteIdFromHost', () => {
   it('fetches siteKey w/o periods', () => {
     const siteKey = 'thisIsIt';
     const host = `${siteKey}.sites-test.federalist.18f.gov`;
     const domain = 'sites-test.federalist.18f.gov';
-    expect(getSiteKeyValue(host, domain)).to.equal(siteKey);
+    expect(stripSiteIdFromHost(host, domain)).to.equal(siteKey);
   });
 
   it('fetches siteKey w/ periods', () => {
     const siteKey = 'this.is.it.sites-test';
     const host = `${siteKey}.sites-test.federalist.18f.gov`;
     const domain = 'sites-test.federalist.18f.gov';
-    expect(getSiteKeyValue(host, domain)).to.equal(siteKey);
+    expect(stripSiteIdFromHost(host, domain)).to.equal(siteKey);
+  });
+
+  it('fetches siteKey w/o periods', () => {
+    const siteKey = 'thisIsIt';
+    const host = `${siteKey}.sites-dev.federalist.18f.gov`;
+    const domain = 'sites-test.federalist.18f.gov';
+    expect(() => stripSiteIdFromHost(host, domain)).to.throw();
   });
 });
+
 
 describe('getSiteQueryParams', () => {
   it('returns params', () => {
@@ -123,5 +131,10 @@ describe('getAppConfig', () => {
       tableName: 'federalist-proxy-prod',
       siteKey: 'id',
     });
+  });
+
+  it('env not found', () => {
+    const context = getContext('viewer-request');
+    expect(() => getAppConfig(context.functionName.replace('test', 'dev'))).to.throw();
   });
 });
