@@ -2,25 +2,22 @@
 const AWS = require('aws-sdk');
 const log = require('./logger');
 
-const testConfig = {
-  appEnv: 'test',
-  domain: 'sites-test.federalist.18f.gov',
-  tableName: 'federalist-proxy-test',
-  siteKey: 'id',
-};
-
-const stagingConfig = {
-  appEnv: 'staging',
-  domain: 'sites-staging.federalist.18f.gov',
-  tableName: 'federalist-proxy-staging',
-  siteKey: 'id',
-};
-
-const prodConfig = {
-  appEnv: 'production',
-  domain: 'sites-prod.federalist.18f.gov',
-  tableName: 'federalist-proxy-prod',
-  siteKey: 'id',
+const appConfig = {
+  test: {
+    domain: 'sites-test.federalist.18f.gov',
+    tableName: 'federalist-proxy-test',
+    siteKey: 'id',
+  },
+  staging: {
+    domain: 'sites-staging.federalist.18f.gov',
+    tableName: 'federalist-proxy-staging',
+    siteKey: 'id',
+  },
+  prod: {
+    domain: 'sites-prod.federalist.18f.gov',
+    tableName: 'federalist-proxy-prod',
+    siteKey: 'id',
+  }
 };
 
 const getSiteConfig = async (params) => {
@@ -43,20 +40,16 @@ const getSiteConfig = async (params) => {
 };
 
 const validateProxyFunctionName = functionName => /^us-east-1:federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response):\d+$/
-  .test(functionName);
+  .exec(functionName);
 
 const getAppConfig = (functionName) => {
-  let appConfig = {};
   if (validateProxyFunctionName(functionName)) {
-    if (/staging/.test(functionName)) {
-      appConfig = stagingConfig;
-    } else if (/prod/.test(functionName)) {
-      appConfig = prodConfig;
-    } else if (/test/.test(functionName)) {
-      appConfig = testConfig;
+    const appEnv = /prod|staging|test/.exec(functionName);
+    if (appEnv && appEnv.length) {
+      return appConfig[appEnv[0]];
     }
   }
-  return appConfig;
+  throw new Error(`Unable to find appConfig for @function: ${functionName}`);
 };
 
 const getSiteKeyValue = (host, appDomain) => {

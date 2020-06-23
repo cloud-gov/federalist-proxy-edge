@@ -101,7 +101,6 @@ describe('getAppConfig', () => {
   it('get test', () => {
     const context = getContext('viewer-request');
     expect(getAppConfig(context.functionName)).to.deep.equal({
-      appEnv: 'test',
       domain: 'sites-test.federalist.18f.gov',
       tableName: 'federalist-proxy-test',
       siteKey: 'id',
@@ -111,7 +110,6 @@ describe('getAppConfig', () => {
   it('get staging', () => {
     const context = getContext('viewer-request');
     expect(getAppConfig(context.functionName.replace('test', 'staging'))).to.deep.equal({
-      appEnv: 'staging',
       domain: 'sites-staging.federalist.18f.gov',
       tableName: 'federalist-proxy-staging',
       siteKey: 'id',
@@ -121,7 +119,6 @@ describe('getAppConfig', () => {
   it('get prod', () => {
     const context = getContext('viewer-request');
     expect(getAppConfig(context.functionName.replace('test', 'prod'))).to.deep.equal({
-      appEnv: 'production',
       domain: 'sites-prod.federalist.18f.gov',
       tableName: 'federalist-proxy-prod',
       siteKey: 'id',

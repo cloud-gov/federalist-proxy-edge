@@ -3,7 +3,7 @@ const {
   getSiteConfig, parseURI, getSiteQueryParams
 } = require('./helpers/dynamoDBHelper');
 
-const getHost = request => request.headers.host[0].value;
+const { getHost } = require('./helpers/utils');
 
 const originRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
