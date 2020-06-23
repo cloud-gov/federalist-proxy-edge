@@ -17,7 +17,7 @@ const appConfig = {
     domain: 'sites-prod.federalist.18f.gov',
     tableName: 'federalist-proxy-prod',
     siteKey: 'id',
-  }
+  },
 };
 
 const getSiteConfig = async (params) => {
