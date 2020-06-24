@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig,
+  getSiteConfig, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSiteConfig', () => {
@@ -103,6 +103,56 @@ describe('getSiteQueryParams', () => {
     const host = 'the.site.key.sites-test.federalist.18f.gov';
     expect(getSiteQueryParams(host, context.functionName)).to.deep.equal(expectedParams);
   });
+});
+
+describe('functionNameRE', () => {
+  /* eslint-disable no-unused-expressions */
+  it('returns matches', () => {
+    const appEnvs = ['test', 'staging', 'prod'];
+    const eventTypes = ['origin-request', 'origin-response', 'viewer-request', 'viewer-response'];
+    let i;
+    let j;
+    let match;
+    let functionName;
+    for (i = 0; i < appEnvs.length; i += 1) {
+      for (j = 0; j < eventTypes.length; j += 1) {
+        functionName = `us-east-1:federalist-proxy-${appEnvs[i]}-${eventTypes[j]}:${i * j * 10}`;
+        match = functionNameRE.exec(functionName);
+        expect(match).to.be.an('array');
+      }
+    }
+  });
+
+  it('fails for non test, staging and prod envs', () => {
+    const functionName = 'us-east-1:federalist-proxy-dev-viewer-request:0';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails for non-viwer/origin request', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-blah-request:0';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails for non request/response events', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-viewer-blah:0';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails - requires numerical function', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-viewer-request:b';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails - requires versioned function', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-viewer-request:';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+  /* eslint-enable no-unused-expressions */
 });
 
 describe('getAppConfig', () => {

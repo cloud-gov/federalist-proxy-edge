@@ -39,17 +39,14 @@ const getSiteConfig = async (params) => {
     });
 };
 
-const validateProxyFunctionName = functionName => /^us-east-1:federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response):\d+$/
-  .exec(functionName);
+const functionNameRE = /^us-east-1:federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response):\d+$/;
 
 const getAppConfig = (functionName) => {
-  if (validateProxyFunctionName(functionName)) {
-    const appEnv = /prod|staging|test/.exec(functionName);
-    if (appEnv && appEnv.length) {
-      return appConfig[appEnv[0]];
-    }
+  const match = functionNameRE.exec(functionName);
+  if (!match) {
+    throw new Error(`Unable to find appConfig for @function: ${functionName}`);
   }
-  throw new Error(`Unable to find appConfig for @function: ${functionName}`);
+  return appConfig[match[1]];
 };
 
 const stripSiteIdFromHost = (host, appDomain) => {
@@ -81,5 +78,5 @@ const parseURI = (request) => {
 };
 
 module.exports = {
-  getSiteConfig, parseURI, getSiteQueryParams, stripSiteIdFromHost, getAppConfig,
+  getSiteConfig, parseURI, getSiteQueryParams, stripSiteIdFromHost, getAppConfig, functionNameRE,
 };
