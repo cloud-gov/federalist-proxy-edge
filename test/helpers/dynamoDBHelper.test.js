@@ -14,13 +14,13 @@ describe('getSiteConfig', () => {
     const params = {};
 
     const results = {
-      Item: { settings: { bucket_name: 'testBucket' } },
+      Item: { Settings: { BucketName: 'testBucket' } },
     };
 
     stubDocDBQuery(() => results);
 
     const response = await getSiteConfig(params);
-    expect(response).to.deep.equal({ bucket_name: 'testBucket' });
+    expect(response).to.deep.equal({ BucketName: 'testBucket' });
   });
 
   it('does not fetch site config - not found', async () => {
@@ -96,7 +96,7 @@ describe('getSiteQueryParams', () => {
     const expectedParams = {
       TableName: 'federalist-proxy-test',
       Key: {
-        id: 'the.site.key',
+        Id: 'the.site.key',
       },
     };
     const context = getContext('viewer-request');
@@ -161,7 +161,7 @@ describe('getAppConfig', () => {
     expect(getAppConfig(context.functionName)).to.deep.equal({
       domain: 'sites-test.federalist.18f.gov',
       tableName: 'federalist-proxy-test',
-      siteKey: 'id',
+      siteKey: 'Id',
     });
   });
 
@@ -170,7 +170,7 @@ describe('getAppConfig', () => {
     expect(getAppConfig(context.functionName.replace('test', 'staging'))).to.deep.equal({
       domain: 'sites-staging.federalist.18f.gov',
       tableName: 'federalist-proxy-staging',
-      siteKey: 'id',
+      siteKey: 'Id',
     });
   });
 
@@ -179,7 +179,7 @@ describe('getAppConfig', () => {
     expect(getAppConfig(context.functionName.replace('test', 'prod'))).to.deep.equal({
       domain: 'sites-prod.federalist.18f.gov',
       tableName: 'federalist-proxy-prod',
-      siteKey: 'id',
+      siteKey: 'Id',
     });
   });
 

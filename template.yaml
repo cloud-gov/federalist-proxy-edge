@@ -119,7 +119,7 @@ Resources:
     Properties:
       TableName: !Sub "federalist-proxy-${StackEnv}"
       PrimaryKey:
-        Name: id
+        Name: Id
         Type: String
       Tags:
           AppType: Serverless
