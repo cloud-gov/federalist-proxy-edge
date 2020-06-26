@@ -24,7 +24,7 @@ describe('originResponse', () => {
 
     const response = await originResponse(event);
 
-    expect(Object.keys(response.headers).length).to.equal(2);
+    expect(Object.keys(response.headers).length).to.equal(3);
     expect(response.headers['strict-transport-security']).to.deep.equal(strictTransportSecurity);
     expect(response.headers['X-Frame-Options']).to.deep.equal(xFrameOptions);
     expect(response.headers['X-Server']).to.deep.equal(xServer);
