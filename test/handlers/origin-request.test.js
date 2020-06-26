@@ -12,7 +12,7 @@ describe('originRequest', () => {
 
   it('returns a message', async () => {
     const results = {
-      Item: { settings: { bucket_name: 'testBucket' } },
+      Item: { Settings: { BucketName: 'testBucket' } },
     };
 
     stubDocDBQuery(() => results);

@@ -16,7 +16,7 @@ const originRequest = async (event, context) => {
   const params = getSiteQueryParams(host, context.functionName);
   return getSiteConfig(params)
     .then((siteConfig) => {
-      const { bucket_name: bucket } = siteConfig;
+      const { BucketName: bucket } = siteConfig;
 
       if (bucket) {
         const s3DomainName = `${bucket}.app.cloud.gov`;
@@ -64,7 +64,7 @@ const viewerRequest = async (event, context) => {
   const params = getSiteQueryParams(host, context.functionName);
   return getSiteConfig(params)
     .then((siteConfig) => {
-      const { basic_auth: credentials } = siteConfig;
+      const { BasicAuth: credentials } = siteConfig;
 
       if (!credentials) {
         return request;
@@ -74,7 +74,7 @@ const viewerRequest = async (event, context) => {
         { key: 'X-Forwarded-Host', value: request.headers.host[0].value },
       ];
 
-      const { username, password } = credentials;
+      const { Username: username, Password: password } = credentials;
 
       // Build a Basic Authentication string
       const authString = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;

@@ -6,17 +6,17 @@ const appConfig = {
   test: {
     domain: 'sites-test.federalist.18f.gov',
     tableName: 'federalist-proxy-test',
-    siteKey: 'id',
+    siteKey: 'Id',
   },
   staging: {
     domain: 'sites-staging.federalist.18f.gov',
     tableName: 'federalist-proxy-staging',
-    siteKey: 'id',
+    siteKey: 'Id',
   },
   prod: {
     domain: 'sites-prod.federalist.18f.gov',
     tableName: 'federalist-proxy-prod',
-    siteKey: 'id',
+    siteKey: 'Id',
   },
 };
 
@@ -32,7 +32,7 @@ const getSiteConfig = async (params) => {
     .then(({ Item }) => {
       if (Item) {
         log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.id)}\n`);
-        return Item.settings;
+        return Item.Settings;
       }
       log('\nQuery succeeded: no results found!!\n');
       return undefined;
