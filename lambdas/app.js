@@ -46,6 +46,9 @@ const originResponse = async (event) => {
   response.headers['X-Frame-Options'] = [
     { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
   ];
+  response.headers['X-Server'] = [
+    { key: 'X-Server', value: 'Federalist' },
+  ];
   return response;
 };
 // custom error handling
