@@ -4,12 +4,65 @@ const sinon = require('sinon');
 function stubDocDBQuery(fn) {
   return sinon.stub(AWS.DynamoDB, 'DocumentClient')
     .returns({
-      query: () => ({
+      get: () => ({
         promise: async () => fn(),
       }),
     });
 }
 
+const getRequestEvent = () => ({
+  Records: [
+    {
+      cf: {
+        config: {
+          distributionId: 'EXAMPLE',
+        },
+        request: {
+          uri: '/site/testOwner/testRepo/index.html',
+          method: 'GET',
+          clientIp: '2001:cdba::3257:9652',
+          headers: {
+            host: [
+              {
+                key: 'Host',
+                value: 'o-owner-r-repo.sites-test.federalist.18f.gov',
+              },
+            ],
+            'user-agent': [
+              {
+                key: 'User-Agent',
+                value: 'Test Agent',
+              },
+            ],
+            'user-name': [
+              {
+                key: 'User-Name',
+                value: 'aws-cloudfront',
+              },
+            ],
+          },
+        },
+      },
+    },
+  ],
+});
+
+const getResponseEvent = () => ({
+  Records: [
+    {
+      cf: {
+        response: {
+          headers: {},
+          status: '200',
+          statusDescription: 'OK',
+        },
+      },
+    },
+  ],
+});
+
+const getContext = eventType => ({ functionName: `us-east-1:federalist-proxy-test-${eventType}:0` });
+
 module.exports = {
-  stubDocDBQuery,
+  stubDocDBQuery, getContext, getRequestEvent, getResponseEvent,
 };

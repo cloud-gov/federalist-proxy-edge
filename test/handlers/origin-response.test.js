@@ -1,20 +1,7 @@
 const { expect } = require('chai');
+const { getResponseEvent } = require('../support');
 
 const { originResponse } = require('../../lambdas/app');
-
-const event = {
-  Records: [
-    {
-      cf: {
-        response: {
-          headers: {},
-          status: '200',
-          statusDescription: 'OK',
-        },
-      },
-    },
-  ],
-};
 
 describe('originResponse', () => {
   it('returns the message', async () => {
@@ -22,7 +9,7 @@ describe('originResponse', () => {
     const xFrameOptions = [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }];
     const xServer = [{ key: 'X-Server', value: 'Federalist' }];
 
-    const response = await originResponse(event);
+    const response = await originResponse(getResponseEvent());
 
     expect(Object.keys(response.headers).length).to.equal(3);
     expect(response.headers['strict-transport-security']).to.deep.equal(strictTransportSecurity);

@@ -23,7 +23,7 @@ Resources:
   BasicAuthFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "fed-proxy-${StackEnv}-basic-auth"
+      FunctionName: !Sub "federalist-proxy-${StackEnv}-viewer-request"
       CodeUri: lambdas/
       Handler: app.viewerRequest
       Runtime: nodejs12.x
@@ -33,7 +33,7 @@ Resources:
   CustomOriginRoutingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "fed-proxy-${StackEnv}-origin-request"
+      FunctionName: !Sub "federalist-proxy-${StackEnv}-origin-request"
       CodeUri: lambdas/
       Handler: app.originRequest
       Runtime: nodejs12.x
@@ -43,7 +43,7 @@ Resources:
   CustomHeadersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "fed-proxy-${StackEnv}-origin-response"
+      FunctionName: !Sub "federalist-proxy-${StackEnv}-origin-response"
       CodeUri: lambdas/
       Handler: app.originResponse
       Runtime: nodejs12.x
@@ -119,7 +119,7 @@ Resources:
     Properties:
       TableName: !Sub "federalist-proxy-${StackEnv}"
       PrimaryKey:
-        Name: id
+        Name: Id
         Type: String
       Tags:
           AppType: Serverless

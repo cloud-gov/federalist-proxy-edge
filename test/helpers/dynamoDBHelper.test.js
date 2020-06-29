@@ -1,9 +1,8 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { stubDocDBQuery } = require('../support');
-
+const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,
+  getSiteConfig, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSiteConfig', () => {
@@ -15,23 +14,19 @@ describe('getSiteConfig', () => {
     const params = {};
 
     const results = {
-      Count: 1,
-      Items: [{ settings: { bucket_name: 'testBucket' } }],
+      Item: { Settings: { BucketName: 'testBucket' } },
     };
 
     stubDocDBQuery(() => results);
 
     const response = await getSiteConfig(params);
-    expect(response).to.deep.equal({ bucket_name: 'testBucket' });
+    expect(response).to.deep.equal({ BucketName: 'testBucket' });
   });
 
   it('does not fetch site config - not found', async () => {
     const params = {};
 
-    const results = {
-      Count: 0,
-      Items: [],
-    };
+    const results = {};
 
     stubDocDBQuery(() => results);
 
@@ -72,39 +67,124 @@ describe('parseURI', () => {
   });
 });
 
-describe('getSubdomain', () => {
-  it('fetches subdomain', () => {
-    const request = {
-      headers: {
-        host: [
-          {
-            key: 'Host',
-            value: 'subdomain.example.gov',
-          },
-        ],
-      },
-    };
-    expect(getSubdomain(request)).to.equal('subdomain');
+describe('stripSiteIdFromHost', () => {
+  it('fetches siteKey w/o periods', () => {
+    const siteKey = 'thisIsIt';
+    const host = `${siteKey}.sites-test.federalist.18f.gov`;
+    const domain = 'sites-test.federalist.18f.gov';
+    expect(stripSiteIdFromHost(host, domain)).to.equal(siteKey);
+  });
+
+  it('fetches siteKey w/ periods', () => {
+    const siteKey = 'this.is.it.sites-test';
+    const host = `${siteKey}.sites-test.federalist.18f.gov`;
+    const domain = 'sites-test.federalist.18f.gov';
+    expect(stripSiteIdFromHost(host, domain)).to.equal(siteKey);
+  });
+
+  it('fetches siteKey w/o periods', () => {
+    const siteKey = 'thisIsIt';
+    const host = `${siteKey}.sites-dev.federalist.18f.gov`;
+    const domain = 'sites-test.federalist.18f.gov';
+    expect(() => stripSiteIdFromHost(host, domain)).to.throw();
   });
 });
 
+
 describe('getSiteQueryParams', () => {
   it('returns params', () => {
-    const tableName = 'testTable';
-    const siteKey = 'id';
-    const siteKeyValue = 'site-key';
-
     const expectedParams = {
-      TableName: 'testTable',
-      KeyConditionExpression: '#id = :id',
-      ExpressionAttributeNames:
-        {
-          '#id': 'id',
-        },
-      ExpressionAttributeValues: {
-        ':id': 'site-key',
+      TableName: 'federalist-proxy-test',
+      Key: {
+        Id: 'the.site.key',
       },
     };
-    expect(getSiteQueryParams(tableName, siteKey, siteKeyValue)).to.deep.equal(expectedParams);
+    const context = getContext('viewer-request');
+    const host = 'the.site.key.sites-test.federalist.18f.gov';
+    expect(getSiteQueryParams(host, context.functionName)).to.deep.equal(expectedParams);
+  });
+});
+
+describe('functionNameRE', () => {
+  /* eslint-disable no-unused-expressions */
+  it('returns matches', () => {
+    const appEnvs = ['test', 'staging', 'prod'];
+    const eventTypes = ['origin-request', 'origin-response', 'viewer-request', 'viewer-response'];
+    let i;
+    let j;
+    let match;
+    let functionName;
+    for (i = 0; i < appEnvs.length; i += 1) {
+      for (j = 0; j < eventTypes.length; j += 1) {
+        functionName = `us-east-1:federalist-proxy-${appEnvs[i]}-${eventTypes[j]}:${i * j * 10}`;
+        match = functionNameRE.exec(functionName);
+        expect(match).to.be.an('array');
+      }
+    }
+  });
+
+  it('fails for non test, staging and prod envs', () => {
+    const functionName = 'us-east-1:federalist-proxy-dev-viewer-request:0';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails for non-viwer/origin request', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-blah-request:0';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails for non request/response events', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-viewer-blah:0';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails - requires numerical function', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-viewer-request:b';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+
+  it('fails - requires versioned function', () => {
+    const functionName = 'us-east-1:federalist-proxy-test-viewer-request:';
+    const match = functionNameRE.exec(functionName);
+    expect(match).to.be.null;
+  });
+  /* eslint-enable no-unused-expressions */
+});
+
+describe('getAppConfig', () => {
+  it('get test', () => {
+    const context = getContext('viewer-request');
+    expect(getAppConfig(context.functionName)).to.deep.equal({
+      domain: 'sites-test.federalist.18f.gov',
+      tableName: 'federalist-proxy-test',
+      siteKey: 'Id',
+    });
+  });
+
+  it('get staging', () => {
+    const context = getContext('viewer-request');
+    expect(getAppConfig(context.functionName.replace('test', 'staging'))).to.deep.equal({
+      domain: 'sites-staging.federalist.18f.gov',
+      tableName: 'federalist-proxy-staging',
+      siteKey: 'Id',
+    });
+  });
+
+  it('get prod', () => {
+    const context = getContext('viewer-request');
+    expect(getAppConfig(context.functionName.replace('test', 'prod'))).to.deep.equal({
+      domain: 'sites-prod.federalist.18f.gov',
+      tableName: 'federalist-proxy-prod',
+      siteKey: 'Id',
+    });
+  });
+
+  it('env not found', () => {
+    const context = getContext('viewer-request');
+    expect(() => getAppConfig(context.functionName.replace('test', 'dev'))).to.throw();
   });
 });

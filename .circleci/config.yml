@@ -44,7 +44,7 @@ jobs:
           command: sam build --parameter-overrides StackEnv=staging
       - run:
           name: "sam deploy staging"
-          command: sam deploy --parameter-overrides StackEnv=staging --stack-name=fed-proxy-staging
+          command: sam deploy --parameter-overrides StackEnv=staging --stack-name=federalist-proxy-staging
 orbs:
   aws-serverless: circleci/aws-serverless@1.0.2
 version: 2.1

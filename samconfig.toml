@@ -2,11 +2,11 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "fed-proxy-staging"
+stack_name = "federalist-proxy-staging"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1gm71w3b8vaj5"
-s3_prefix = "fed-proxy-staging"
+s3_prefix = "federalist-proxy-staging"
 region = "us-east-1"
-confirm_changeset = false
+confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "StackEnv=\"staging\""
 

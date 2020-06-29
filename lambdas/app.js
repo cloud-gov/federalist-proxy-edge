@@ -1,25 +1,22 @@
 const handlerLogWrapper = require('./helpers/handlerLogWrapper');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, getSubdomain,
+  getSiteConfig, parseURI, getSiteQueryParams
 } = require('./helpers/dynamoDBHelper');
 
-const siteKey = 'id';
+const { getHost } = require('./helpers/utils');
 
-const originRequest = async (event) => {
+const originRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
 
   /**
     * Reads query string to check if S3 origin should be used, and
     * if true, sets S3 origin properties.
     */
-
-  const subdomain = getSubdomain(request);
-
-  const siteQueryParams = getSiteQueryParams('federalist-proxy-staging', siteKey, subdomain);
-
-  return getSiteConfig(siteQueryParams)
+  const host = getHost(request);
+  const params = getSiteQueryParams(host, context.functionName);
+  return getSiteConfig(params)
     .then((siteConfig) => {
-      const { bucket_name: bucket } = siteConfig;
+      const { BucketName: bucket } = siteConfig;
 
       if (bucket) {
         const s3DomainName = `${bucket}.app.cloud.gov`;
@@ -59,20 +56,18 @@ const originResponse = async (event) => {
 // https://stackoverflow.com/questions/28449363/why-is-this-http-request-not-working-on-aws-lambda
 
 
-const viewerRequest = async (event) => {
+const viewerRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
 
   if (parseURI(request).siteType !== 'preview') {
     return request;
   }
 
-  const subdomain = getSubdomain(request);
-
-  const siteQueryParams = getSiteQueryParams('federalist-proxy-staging', siteKey, subdomain);
-
-  return getSiteConfig(siteQueryParams)
+  const host = getHost(request);
+  const params = getSiteQueryParams(host, context.functionName);
+  return getSiteConfig(params)
     .then((siteConfig) => {
-      const { basic_auth: credentials } = siteConfig;
+      const { BasicAuth: credentials } = siteConfig;
 
       if (!credentials) {
         return request;
@@ -82,7 +77,7 @@ const viewerRequest = async (event) => {
         { key: 'X-Forwarded-Host', value: request.headers.host[0].value },
       ];
 
-      const { username, password } = credentials;
+      const { Username: username, Password: password } = credentials;
 
       // Build a Basic Authentication string
       const authString = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
