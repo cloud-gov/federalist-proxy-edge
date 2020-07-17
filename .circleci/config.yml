@@ -57,4 +57,4 @@ workflows:
             - test-stack
           filters:
             branches:
-              only: master
+              only: main
