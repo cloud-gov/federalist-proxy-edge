@@ -116,7 +116,7 @@ describe('functionNameRE', () => {
     let functionName;
     for (i = 0; i < appEnvs.length; i += 1) {
       for (j = 0; j < eventTypes.length; j += 1) {
-        functionName = `us-east-1:federalist-proxy-${appEnvs[i]}-${eventTypes[j]}:${i * j * 10}`;
+        functionName = `us-east-1.federalist-proxy-${appEnvs[i]}-${eventTypes[j]}`;
         match = functionNameRE.exec(functionName);
         expect(match).to.be.an('array');
       }
@@ -124,31 +124,19 @@ describe('functionNameRE', () => {
   });
 
   it('fails for non test, staging and prod envs', () => {
-    const functionName = 'us-east-1:federalist-proxy-dev-viewer-request:0';
+    const functionName = 'us-east-1.federalist-proxy-dev-viewer-request';
     const match = functionNameRE.exec(functionName);
     expect(match).to.be.null;
   });
 
   it('fails for non-viwer/origin request', () => {
-    const functionName = 'us-east-1:federalist-proxy-test-blah-request:0';
+    const functionName = 'us-east-1.federalist-proxy-test-blah-request';
     const match = functionNameRE.exec(functionName);
     expect(match).to.be.null;
   });
 
   it('fails for non request/response events', () => {
-    const functionName = 'us-east-1:federalist-proxy-test-viewer-blah:0';
-    const match = functionNameRE.exec(functionName);
-    expect(match).to.be.null;
-  });
-
-  it('fails - requires numerical function', () => {
-    const functionName = 'us-east-1:federalist-proxy-test-viewer-request:b';
-    const match = functionNameRE.exec(functionName);
-    expect(match).to.be.null;
-  });
-
-  it('fails - requires versioned function', () => {
-    const functionName = 'us-east-1:federalist-proxy-test-viewer-request:';
+    const functionName = 'us-east-1.federalist-proxy-test-viewer-blah';
     const match = functionNameRE.exec(functionName);
     expect(match).to.be.null;
   });
