@@ -59,4 +59,3 @@ workflows:
             branches:
               only:
                 - main
-                - ci-deploy-user
