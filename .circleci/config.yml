@@ -44,7 +44,7 @@ jobs:
           command: sam build --parameter-overrides StackEnv=staging
       - run:
           name: "sam deploy staging"
-          command: sam deploy --parameter-overrides StackEnv=staging --stack-name=federalist-proxy-staging
+          command: sam deploy --parameter-overrides StackEnv=staging --stack-name=federalist-proxy-staging --no-confirm-changeset --no-fail-on-empty-changeset
 orbs:
   aws-serverless: circleci/aws-serverless@1.0.2
 version: 2.1
@@ -57,4 +57,5 @@ workflows:
             - test-stack
           filters:
             branches:
-              only: main
+              only:
+                - main
