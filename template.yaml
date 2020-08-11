@@ -118,18 +118,22 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Sub "federalist-proxy-${StackEnv}"
+      AttributeDefinitions:
+        - AttributeName: Id
+          AttributeType: S
+        - AttributeName: BucketName
+          AttributeType: S
       KeySchema:
-          - AttributeName: Id
-            KeyType: Hash
-      GlobalSecondaryIndex:
-        IndexName:  BucketNameIdx
-        KeySchema:
-          - AttributeName: BucketName
-            KeyType: Hash
-        Projection:
-          ProjectionType: ALL
-      Tags:
-          AppType: Serverless
+        - AttributeName: Id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: BucketNameIdx
+          KeySchema:
+            - AttributeName: BucketName
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
 
   DomainCertificate:
     Type: AWS::CertificateManager::Certificate

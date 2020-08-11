@@ -62,4 +62,3 @@ workflows:
             branches:
               only:
                 - main
-                - bucket-name-gsi-test
