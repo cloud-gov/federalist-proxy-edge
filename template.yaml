@@ -118,9 +118,9 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Sub "federalist-proxy-${StackEnv}"
-      PrimaryKey:
-        Name: Id
-        Type: String
+      KeySchema:
+          - AttributeName: Id
+            KeyType: Hash
       GlobalSecondaryIndex:
         IndexName:  BucketNameIdx
         KeySchema:
