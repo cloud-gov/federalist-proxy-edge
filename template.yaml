@@ -127,9 +127,7 @@ Resources:
           - AttributeName: BucketName
             KeyType: Hash
         Projection:
-          ProjectionType: INCLUDE
-          NonKeyAttributes:
-            - Settings
+          ProjectionType: ALL
       Tags:
           AppType: Serverless
 
