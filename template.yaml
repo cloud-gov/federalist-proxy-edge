@@ -115,12 +115,21 @@ Resources:
     Type: AWS::S3::Bucket
 
   DynamoSiteTable:
-    Type: AWS::Serverless::SimpleTable # if you want to define a more complex table, use AWS::DynamoDB::Table
+    Type: AWS::Serverless::DynamoTable
     Properties:
       TableName: !Sub "federalist-proxy-${StackEnv}"
       PrimaryKey:
         Name: Id
         Type: String
+      GlobalSecondaryIndex:
+        IndexName:  BucketNameIdx
+        KeySchema:
+          - AttributeName: BucketName
+            KeyType: Hash
+        Projection:
+          ProjectionType: INCLUDE
+          NonKeyAttributes:
+            - Settings
       Tags:
           AppType: Serverless
 
