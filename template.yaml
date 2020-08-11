@@ -114,22 +114,22 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
 
-  # DynamoSiteTable:
-  #   Type: AWS::Serverless::DynamoTable
-  #   Properties:
-  #     TableName: !Sub "federalist-proxy-${StackEnv}"
-  #     PrimaryKey:
-  #       Name: Id
-  #       Type: String
-  #     GlobalSecondaryIndex:
-  #       IndexName:  BucketNameIdx
-  #       KeySchema:
-  #         - AttributeName: BucketName
-  #           KeyType: Hash
-  #       Projection:
-  #         ProjectionType: ALL
-  #     Tags:
-  #         AppType: Serverless
+  DynamoSiteTable:
+    Type: AWS::Serverless::DynamoTable
+    Properties:
+      TableName: !Sub "federalist-proxy-${StackEnv}"
+      PrimaryKey:
+        Name: Id
+        Type: String
+      GlobalSecondaryIndex:
+        IndexName:  BucketNameIdx
+        KeySchema:
+          - AttributeName: BucketName
+            KeyType: Hash
+        Projection:
+          ProjectionType: ALL
+      Tags:
+          AppType: Serverless
 
   DomainCertificate:
     Type: AWS::CertificateManager::Certificate
