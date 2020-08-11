@@ -31,7 +31,7 @@ const getSite = async (params) => {
     })
     .then(({ Item }) => {
       if (Item) {
-        log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.id)}\n`);
+        log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.Id)}\n`);
         return Item;
       }
       log('\nQuery succeeded: no results found!!\n');
