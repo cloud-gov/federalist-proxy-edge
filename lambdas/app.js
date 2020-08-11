@@ -16,7 +16,7 @@ const originRequest = async (event, context) => {
   const params = getSiteQueryParams(host, context.functionName);
   return getSite(params)
     .then((site) => {
-      const { Settings: { BucketName: bucket } } = site;
+      const { BucketName: bucket } = site;
 
       if (bucket) {
         const s3DomainName = `${bucket}.app.cloud.gov`;
