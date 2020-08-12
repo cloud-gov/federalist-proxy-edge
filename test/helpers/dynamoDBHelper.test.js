@@ -2,10 +2,10 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSiteConfig, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
+  getSite, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
-describe('getSiteConfig', () => {
+describe('getSite', () => {
   afterEach(() => {
     sinon.restore();
   });
@@ -19,8 +19,8 @@ describe('getSiteConfig', () => {
 
     stubDocDBQuery(() => results);
 
-    const response = await getSiteConfig(params);
-    expect(response).to.deep.equal({ BucketName: 'testBucket' });
+    const response = await getSite(params);
+    expect(response).to.deep.equal({ Settings: { BucketName: 'testBucket' } });
   });
 
   it('does not fetch site config - not found', async () => {
@@ -30,7 +30,7 @@ describe('getSiteConfig', () => {
 
     stubDocDBQuery(() => results);
 
-    const response = await getSiteConfig(params);
+    const response = await getSite(params);
     expect(response).to.eq(undefined);
   });
 
@@ -39,7 +39,7 @@ describe('getSiteConfig', () => {
 
     stubDocDBQuery(() => { throw new Error('test error'); });
 
-    const err = await getSiteConfig(params).catch(e => e);
+    const err = await getSite(params).catch(e => e);
 
     expect(err).to.be.a('error');
   });

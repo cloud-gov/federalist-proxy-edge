@@ -43,6 +43,9 @@ jobs:
           name: sam build staging
           command: sam build --parameter-overrides StackEnv=staging
       - run:
+          name: sam validate staging template
+          command: sam validate
+      - run:
           name: "sam deploy staging"
           command: sam deploy --parameter-overrides StackEnv=staging --stack-name=federalist-proxy-staging --no-confirm-changeset --no-fail-on-empty-changeset
 orbs:

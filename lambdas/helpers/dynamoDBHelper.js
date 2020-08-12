@@ -20,7 +20,7 @@ const appConfig = {
   },
 };
 
-const getSiteConfig = async (params) => {
+const getSite = async (params) => {
   const docClient = new AWS.DynamoDB.DocumentClient({
     httpOptions: { connectTimeout: 120000, timeout: 120000 },
   });
@@ -31,8 +31,8 @@ const getSiteConfig = async (params) => {
     })
     .then(({ Item }) => {
       if (Item) {
-        log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.id)}\n`);
-        return Item.Settings;
+        log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.Id)}\n`);
+        return Item;
       }
       log('\nQuery succeeded: no results found!!\n');
       return undefined;
@@ -78,5 +78,5 @@ const parseURI = (request) => {
 };
 
 module.exports = {
-  getSiteConfig, parseURI, getSiteQueryParams, stripSiteIdFromHost, getAppConfig, functionNameRE,
+  getSite, parseURI, getSiteQueryParams, stripSiteIdFromHost, getAppConfig, functionNameRE,
 };

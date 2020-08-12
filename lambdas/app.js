@@ -1,6 +1,6 @@
 const handlerLogWrapper = require('./helpers/handlerLogWrapper');
 const {
-  getSiteConfig, parseURI, getSiteQueryParams
+  getSite, parseURI, getSiteQueryParams
 } = require('./helpers/dynamoDBHelper');
 
 const { getHost } = require('./helpers/utils');
@@ -14,9 +14,9 @@ const originRequest = async (event, context) => {
     */
   const host = getHost(request);
   const params = getSiteQueryParams(host, context.functionName);
-  return getSiteConfig(params)
-    .then((siteConfig) => {
-      const { BucketName: bucket } = siteConfig;
+  return getSite(params)
+    .then((site) => {
+      const { BucketName: bucket } = site;
 
       if (bucket) {
         const s3DomainName = `${bucket}.app.cloud.gov`;
@@ -65,9 +65,9 @@ const viewerRequest = async (event, context) => {
 
   const host = getHost(request);
   const params = getSiteQueryParams(host, context.functionName);
-  return getSiteConfig(params)
-    .then((siteConfig) => {
-      const { BasicAuth: credentials } = siteConfig;
+  return getSite(params)
+    .then((site) => {
+      const { Settings: { BasicAuth: credentials } } = site;
 
       if (!credentials) {
         return request;
