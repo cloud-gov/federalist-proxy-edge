@@ -4,27 +4,36 @@ const log = require('./logger');
 
 const appConfig = {
   test: {
-    domain: 'sites-test.federalist.18f.gov',
+    siteDomain: 'sites-test.federalist.18f.gov',
+    originDomain: 'app.cloud.gov',
     tableName: 'federalist-proxy-test',
     siteKey: 'Id',
+    originKey: 'BucketName',
+    originIndex: 'BucketNameIdx',
   },
   staging: {
-    domain: 'sites-staging.federalist.18f.gov',
+    siteDomain: 'sites-staging.federalist.18f.gov',
+    originDomain: 'app.cloud.gov',
     tableName: 'federalist-proxy-staging',
     siteKey: 'Id',
+    originKey: 'BucketName',
+    originIndex: 'BucketNameIdx',
   },
   prod: {
-    domain: 'sites-prod.federalist.18f.gov',
+    siteDomain: 'sites-prod.federalist.18f.gov',
+    originDomain: 'app.cloud.gov',
     tableName: 'federalist-proxy-prod',
     siteKey: 'Id',
+    originKey: 'BucketName',
+    originIndex: 'BucketNameIdx',
   },
 };
+const getDocClient = (options = {}) =>  // { httpOptions: { connectTimeout: 120000, timeout: 120000 } }
+  new AWS.DynamoDB.DocumentClient(options);
 
 const getSite = async (params) => {
-  const docClient = new AWS.DynamoDB.DocumentClient({
-    httpOptions: { connectTimeout: 120000, timeout: 120000 },
-  });
-  return docClient.get(params)
+  return getDocClient()
+    .get(params)
     .promise()
     .catch((err) => {
       throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
@@ -39,6 +48,22 @@ const getSite = async (params) => {
     });
 };
 
+const querySite = async (params) => {
+  return getDocClient()
+    .query(params)
+    .promise()
+    .catch((err) => {
+      throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
+    })
+    .then(({ Items, Count }) => {
+      if (Count) {
+        log(`\nQuery succeeded: items found @Count:${Items.Count}\n`);
+      }
+      log('\nQuery succeeded: no results found!!\n');
+      return Items;
+    });
+};
+
 const functionNameRE = /^us-east-1.federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response)$/;
 
 const getAppConfig = (functionName) => {
@@ -49,21 +74,33 @@ const getAppConfig = (functionName) => {
   return appConfig[match[1]];
 };
 
-const stripSiteIdFromHost = (host, appDomain) => {
-  if (host.endsWith(appDomain)) {
-    return host.replace(new RegExp(`.${appDomain}$`), '');
+const stripSiteIndexFromHost = (host, domain) => {
+  if (host.endsWith(domain)) {
+    return host.replace(new RegExp(`.${domain}$`), '');
   }
   throw new Error(`Unable to strip siteId from @host: ${host}`);
 };
 
-const getSiteQueryParams = (host, functionName) => {
-  const { tableName, siteKey, domain } = getAppConfig(functionName);
-  const siteKeyValue = stripSiteIdFromHost(host, domain);
+const getSiteItemParams = (host, functionName) => {
+  const { tableName, siteKey, siteDomain } = getAppConfig(functionName);
+  const siteKeyValue = stripSiteIndexFromHost(host, siteDomain);
   return {
     TableName: tableName,
     Key: {
       [siteKey]: siteKeyValue,
     },
+  };
+};
+
+const getSiteQueryParams = (host, functionName) => {
+  const { tableName, originKey, originDomain, originIndex } = getAppConfig(functionName);
+  const siteIndexValue = stripSiteIndexFromHost(host, originDomain);
+  return {
+    TableName: tableName,
+    IndexName: originIndex,
+    KeyConditionExpression: '#originKey = :origin_key_value',
+    ExpressionAttributeNames:{ '#originKey': originKey },
+    ExpressionAttributeValues: { ':origin_key_value': { S: siteIndexValue } }
   };
 };
 
@@ -78,5 +115,5 @@ const parseURI = (request) => {
 };
 
 module.exports = {
-  getSite, parseURI, getSiteQueryParams, stripSiteIdFromHost, getAppConfig, functionNameRE,
+  getSite, querySite, parseURI, getSiteQueryParams, getSiteItemParams, stripSiteIndexFromHost, getAppConfig, functionNameRE,
 };

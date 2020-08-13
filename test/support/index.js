@@ -7,6 +7,9 @@ function stubDocDBQuery(fn) {
       get: () => ({
         promise: async () => fn(),
       }),
+      query: () => ({
+        promise: async () => fn(),
+      }),
     });
 }
 
@@ -47,14 +50,33 @@ const getRequestEvent = () => ({
   ],
 });
 
-const getResponseEvent = () => ({
+const getResponseEvent = (options = {}) => ({
   Records: [
     {
       cf: {
         response: {
           headers: {},
-          status: '200',
+          status: options.status || '200',
           statusDescription: 'OK',
+        },
+        request: {
+          uri: options.uri || '/site/testOwner/testRepo/index.html',
+          method: 'GET',
+          clientIp: '2001:cdba::3257:9652',
+          headers: {
+            host: [
+              {
+                key: 'Host',
+                value: `${options.bucket || 'testBucket'}.app.cloud.gov`,
+              },
+            ],
+          },
+          origin: {
+            custom: {
+              customHeaders: {},
+              domainName: `${options.bucket || 'testBucket'}.app.cloud.gov`,
+            },
+          },
         },
       },
     },

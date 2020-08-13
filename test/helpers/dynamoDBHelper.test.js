@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSite, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
+  getSite, getSiteQueryParams, getSiteItemParams, parseURI, stripSiteIndexFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSite', () => {
@@ -67,31 +67,31 @@ describe('parseURI', () => {
   });
 });
 
-describe('stripSiteIdFromHost', () => {
+describe('stripSiteIndexFromHost', () => {
   it('fetches siteKey w/o periods', () => {
     const siteKey = 'thisIsIt';
     const host = `${siteKey}.sites-test.federalist.18f.gov`;
     const domain = 'sites-test.federalist.18f.gov';
-    expect(stripSiteIdFromHost(host, domain)).to.equal(siteKey);
+    expect(stripSiteIndexFromHost(host, domain)).to.equal(siteKey);
   });
 
   it('fetches siteKey w/ periods', () => {
     const siteKey = 'this.is.it.sites-test';
     const host = `${siteKey}.sites-test.federalist.18f.gov`;
     const domain = 'sites-test.federalist.18f.gov';
-    expect(stripSiteIdFromHost(host, domain)).to.equal(siteKey);
+    expect(stripSiteIndexFromHost(host, domain)).to.equal(siteKey);
   });
 
   it('fetches siteKey w/o periods', () => {
     const siteKey = 'thisIsIt';
     const host = `${siteKey}.sites-dev.federalist.18f.gov`;
     const domain = 'sites-test.federalist.18f.gov';
-    expect(() => stripSiteIdFromHost(host, domain)).to.throw();
+    expect(() => stripSiteIndexFromHost(host, domain)).to.throw();
   });
 });
 
 
-describe('getSiteQueryParams', () => {
+describe('getSiteItemParams', () => {
   it('returns params', () => {
     const expectedParams = {
       TableName: 'federalist-proxy-test',
@@ -101,6 +101,27 @@ describe('getSiteQueryParams', () => {
     };
     const context = getContext('viewer-request');
     const host = 'the.site.key.sites-test.federalist.18f.gov';
+    expect(getSiteItemParams(host, context.functionName)).to.deep.equal(expectedParams);
+  });
+});
+
+describe('getSiteQueryParams', () => {
+  it('returns params', () => {
+    const expectedParams = {
+      TableName: 'federalist-proxy-test',
+      ExpressionAttributeNames: {
+        '#originKey': 'BucketName',
+      },
+      ExpressionAttributeValues: {
+        ':origin_key_value': {
+          'S': 'theBucket',
+        },
+      },
+      IndexName: 'BucketNameIdx',
+      KeyConditionExpression: '#originKey = :origin_key_value',
+    };
+    const context = getContext('origin-response');
+    const host = 'theBucket.app.cloud.gov';
     expect(getSiteQueryParams(host, context.functionName)).to.deep.equal(expectedParams);
   });
 });
@@ -147,27 +168,36 @@ describe('getAppConfig', () => {
   it('get test', () => {
     const context = getContext('viewer-request');
     expect(getAppConfig(context.functionName)).to.deep.equal({
-      domain: 'sites-test.federalist.18f.gov',
+      siteDomain: 'sites-test.federalist.18f.gov',
       tableName: 'federalist-proxy-test',
       siteKey: 'Id',
+      originDomain: 'app.cloud.gov',
+      originIndex: 'BucketNameIdx',
+      originKey: 'BucketName',
     });
   });
 
   it('get staging', () => {
     const context = getContext('viewer-request');
     expect(getAppConfig(context.functionName.replace('test', 'staging'))).to.deep.equal({
-      domain: 'sites-staging.federalist.18f.gov',
+      siteDomain: 'sites-staging.federalist.18f.gov',
       tableName: 'federalist-proxy-staging',
       siteKey: 'Id',
+      originDomain: 'app.cloud.gov',
+      originIndex: 'BucketNameIdx',
+      originKey: 'BucketName',
     });
   });
 
   it('get prod', () => {
     const context = getContext('viewer-request');
     expect(getAppConfig(context.functionName.replace('test', 'prod'))).to.deep.equal({
-      domain: 'sites-prod.federalist.18f.gov',
+      siteDomain: 'sites-prod.federalist.18f.gov',
       tableName: 'federalist-proxy-prod',
       siteKey: 'Id',
+      originDomain: 'app.cloud.gov',
+      originIndex: 'BucketNameIdx',
+      originKey: 'BucketName',
     });
   });
 
