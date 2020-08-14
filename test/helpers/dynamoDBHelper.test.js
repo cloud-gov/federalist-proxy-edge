@@ -14,13 +14,13 @@ describe('getSite', () => {
     const params = {};
 
     const results = {
-      Item: { Settings: { BucketName: 'testBucket' } },
+      Item: {  BucketName: 'testBucket', Settings: {} },
     };
 
     stubDocDBQuery(() => results);
 
     const response = await getSite(params);
-    expect(response).to.deep.equal({ Settings: { BucketName: 'testBucket' } });
+    expect(response).to.deep.equal({ BucketName: 'testBucket', Settings: {} });
   });
 
   it('does not fetch site config - not found', async () => {
@@ -55,13 +55,13 @@ describe('querySite', () => {
 
     const results = {
       Count: 1,
-      Items: [{ Settings: { BucketName: 'testBucket' } }],
+      Items: [{ BucketName: 'testBucket', Settings: {} }],
     };
 
     stubDocDBQuery(() => results);
 
     const response = await querySite(params);
-    expect(response).to.deep.equal([{ Settings: { BucketName: 'testBucket' } }]);
+    expect(response).to.deep.equal([{ BucketName: 'testBucket', Settings: {} }]);
   });
 
   it('fetches sites by query - results not found', async () => {
