@@ -3,7 +3,7 @@ const {
   getSite, querySite, parseURI, getSiteQueryParams, getSiteItemParams, getOrigin, getOriginQueryParams
 } = require('./helpers/dynamoDBHelper');
 
-const { getHost, getDocument } = require('./helpers/utils');
+const { getHost, httpsGet } = require('./helpers/utils');
 
 const originRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
@@ -49,8 +49,8 @@ const originResponse = async (event, context) => {
 
   if (['404', '403'].includes(response.status) && errorDoc) {
     const { origin: { custom : { domainName, path: originPath } } } = request;
-    const path = [originPath, errorDoc].join('/');
-    const errorDocResponse = await getDocument({ hostname, path });
+    const path = [originPath, errorDoc].join('');
+    const errorDocResponse = await httpsGet({ hostname: domainName, path });
     response.body = errorDocResponse.body;
     response.status = errorDocResponse.status;
     response.headers = { ...response.headers, ...errorDocResponse.headers } ;

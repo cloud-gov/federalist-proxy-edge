@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSite, getSiteQueryParams, getSiteItemParams, parseURI, stripSiteIndexFromHost, getAppConfig, functionNameRE,
+  getSite, querySite, getSiteQueryParams, getSiteItemParams, parseURI, stripSiteIndexFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSite', () => {
@@ -40,6 +40,50 @@ describe('getSite', () => {
     stubDocDBQuery(() => { throw new Error('test error'); });
 
     const err = await getSite(params).catch(e => e);
+
+    expect(err).to.be.a('error');
+  });
+});
+
+describe('querySite', () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it('fetches sites by query - results found', async () => {
+    const params = {};
+
+    const results = {
+      Count: 1,
+      Items: [{ Settings: { BucketName: 'testBucket' } }],
+    };
+
+    stubDocDBQuery(() => results);
+
+    const response = await querySite(params);
+    expect(response).to.deep.equal([{ Settings: { BucketName: 'testBucket' } }]);
+  });
+
+  it('fetches sites by query - results not found', async () => {
+    const params = {};
+
+    const results = {
+      Count: 0,
+      Items: [],
+    };
+
+    stubDocDBQuery(() => results);
+
+    const response = await querySite(params);
+    expect(response).to.deep.equal([]);
+  });
+
+  it('fetches sites by query - rejected', async () => {
+    const params = {};
+
+    stubDocDBQuery(() => { throw new Error('test error'); });
+
+    const err = await querySite(params).catch(e => e);
 
     expect(err).to.be.a('error');
   });
