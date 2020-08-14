@@ -4,16 +4,17 @@ const nock = require('nock');
 const { getResponseEvent, getContext, stubDocDBQuery } = require('../support');
 
 const { originResponse } = require('../../lambdas/app');
+
 const context = getContext('origin-response');
 
-const checkReqHeaders = response => {
+const checkReqHeaders = (response) => {
   const strictTransportSecurity = [{ key: 'Strict-Transport-Security', value: 'max-age=31536001; preload' }];
   const xFrameOptions = [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }];
   const xServer = [{ key: 'X-Server', value: 'Federalist' }];
   expect(response.headers['strict-transport-security']).to.deep.equal(strictTransportSecurity);
   expect(response.headers['X-Frame-Options']).to.deep.equal(xFrameOptions);
   expect(response.headers['X-Server']).to.deep.equal(xServer);
-}
+};
 
 describe('originResponse', () => {
   afterEach(() => {
@@ -47,7 +48,7 @@ describe('originResponse', () => {
   it('returns status 404 w/ errorDOc', async () => {
     const queryResults = {
       Count: 1,
-      Items: [{ Id: 'testId', Settings: { ErrorDocument: '/404.html'}, BucketName: 'testBucket' }],
+      Items: [{ Id: 'testId', Settings: { ErrorDocument: '/404.html' }, BucketName: 'testBucket' }],
     };
 
     stubDocDBQuery(() => queryResults);
@@ -66,7 +67,7 @@ describe('originResponse', () => {
   it('returns status 403 w/ errorDOc', async () => {
     const queryResults = {
       Count: 1,
-      Items: [{ Id: 'testId', Settings: { ErrorDocument: '/404.html'}, BucketName: 'testBucket' }],
+      Items: [{ Id: 'testId', Settings: { ErrorDocument: '/404.html' }, BucketName: 'testBucket' }],
     };
 
     stubDocDBQuery(() => queryResults);

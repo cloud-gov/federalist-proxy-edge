@@ -28,41 +28,38 @@ const appConfig = {
     originIndex: 'BucketNameIdx',
   },
 };
-const getDocClient = (options = {}) =>  // { httpOptions: { connectTimeout: 120000, timeout: 120000 } }
-  new AWS.DynamoDB.DocumentClient(options);
 
-const getSite = async (params) => {
-  return getDocClient()
-    .get(params)
-    .promise()
-    .catch((err) => {
-      throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
-    })
-    .then(({ Item }) => {
-      if (Item) {
-        log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.Id)}\n`);
-        return Item;
-      }
-      log('\nQuery succeeded: no results found!!\n');
-      return undefined;
-    });
-};
+// { httpOptions: { connectTimeout: 120000, timeout: 120000 } }
+const getDocClient = (options = {}) => new AWS.DynamoDB.DocumentClient(options);
 
-const querySite = async (params) => {
-  return getDocClient()
-    .query(params)
-    .promise()
-    .catch((err) => {
-      throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
-    })
-    .then(({ Items, Count }) => {
-      if (Count) {
-        log(`\nQuery succeeded: items found @Count:${Items.Count}\n`);
-      }
-      log('\nQuery succeeded: no results found!!\n');
-      return Items;
-    });
-};
+const getSite = async params => getDocClient()
+  .get(params)
+  .promise()
+  .catch((err) => {
+    throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
+  })
+  .then(({ Item }) => {
+    if (Item) {
+      log(`\nQuery succeeded: item found @id:${JSON.stringify(Item.Id)}\n`);
+      return Item;
+    }
+    log('\nQuery succeeded: no results found!!\n');
+    return undefined;
+  });
+
+const querySite = async params => getDocClient()
+  .query(params)
+  .promise()
+  .catch((err) => {
+    throw new Error(`Unable to query. Error: ${JSON.stringify(err, null, 2)}`);
+  })
+  .then(({ Items, Count }) => {
+    if (Count) {
+      log(`\nQuery succeeded: items found @Count:${Items.Count}\n`);
+    }
+    log('\nQuery succeeded: no results found!!\n');
+    return Items;
+  });
 
 const functionNameRE = /^us-east-1.federalist-proxy-(prod|staging|test)-(viewer|origin)-(request|response)$/;
 
@@ -93,14 +90,16 @@ const getSiteItemParams = (host, functionName) => {
 };
 
 const getSiteQueryParams = (host, functionName) => {
-  const { tableName, originKey, originDomain, originIndex } = getAppConfig(functionName);
+  const {
+    tableName, originKey, originDomain, originIndex,
+  } = getAppConfig(functionName);
   const siteIndexValue = stripSiteIndexFromHost(host, originDomain);
   return {
     TableName: tableName,
     IndexName: originIndex,
     KeyConditionExpression: '#originKey = :origin_key_value',
-    ExpressionAttributeNames:{ '#originKey': originKey },
-    ExpressionAttributeValues: { ':origin_key_value': { S: siteIndexValue } }
+    ExpressionAttributeNames: { '#originKey': originKey },
+    ExpressionAttributeValues: { ':origin_key_value': { S: siteIndexValue } },
   };
 };
 
@@ -115,5 +114,12 @@ const parseURI = (request) => {
 };
 
 module.exports = {
-  getSite, querySite, parseURI, getSiteQueryParams, getSiteItemParams, stripSiteIndexFromHost, getAppConfig, functionNameRE,
+  getSite,
+  querySite,
+  parseURI,
+  getSiteQueryParams,
+  getSiteItemParams,
+  stripSiteIndexFromHost,
+  getAppConfig,
+  functionNameRE,
 };

@@ -5,7 +5,7 @@ const getHost = request => request.headers.host[0].value;
 const httpsGet = params => new Promise((resolve, reject) => {
   let body = '';
   https.get(params, (res) => {
-    res.on('data', chunk => {
+    res.on('data', (chunk) => {
       body += chunk;
     });
     res.on('end', () => {

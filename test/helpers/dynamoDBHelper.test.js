@@ -2,7 +2,8 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSite, querySite, getSiteQueryParams, getSiteItemParams, parseURI, stripSiteIndexFromHost, getAppConfig, functionNameRE,
+  getSite, querySite, getSiteQueryParams, getSiteItemParams, parseURI,
+  stripSiteIndexFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSite', () => {
@@ -14,7 +15,7 @@ describe('getSite', () => {
     const params = {};
 
     const results = {
-      Item: {  BucketName: 'testBucket', Settings: {} },
+      Item: { BucketName: 'testBucket', Settings: {} },
     };
 
     stubDocDBQuery(() => results);
@@ -158,7 +159,7 @@ describe('getSiteQueryParams', () => {
       },
       ExpressionAttributeValues: {
         ':origin_key_value': {
-          'S': 'theBucket',
+          S: 'theBucket',
         },
       },
       IndexName: 'BucketNameIdx',
