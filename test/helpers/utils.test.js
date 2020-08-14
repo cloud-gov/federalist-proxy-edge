@@ -44,7 +44,7 @@ describe('formatHeaders', () => {
   it('format {k1: v1, k2: v2, ...} headers', () => {
     const headers = { header1: 'Header1', 'Header-2': 'header2' };
     expect(formatHeaders(headers)).to.deep.equal({
-      header1: { key: 'header1', value: 'Header1'},
+      header1: { key: 'header1', value: 'Header1' },
       'Header-2': { key: 'Header-2', value: 'header2' },
     });
   });

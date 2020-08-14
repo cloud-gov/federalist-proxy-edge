@@ -16,12 +16,12 @@ const httpsGet = params => new Promise((resolve, reject) => {
   });
 });
 
-const formatHeaders = headers => {
+const formatHeaders = (headers) => {
   const formattedHeaders = {};
   Object.keys(headers)
-    .forEach(key => formattedHeaders[key] = { key: key, value: headers[key] });
+    .forEach(key => formattedHeaders[key] = { key, value: headers[key] });
 
   return formattedHeaders;
-}
+};
 
 module.exports = { getHost, httpsGet, formatHeaders };
