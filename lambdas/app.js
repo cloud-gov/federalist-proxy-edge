@@ -3,7 +3,7 @@ const {
   getSite, querySite, parseURI, getSiteQueryParams, getSiteItemParams, getOrigin, getOriginQueryParams
 } = require('./helpers/dynamoDBHelper');
 
-const { getHost, httpsGet } = require('./helpers/utils');
+const { getHost, httpsGet, formatHeaders } = require('./helpers/utils');
 
 const originRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
@@ -45,7 +45,7 @@ const originResponse = async (event, context) => {
   const params = getSiteQueryParams(host, context.functionName);
   const sites = await querySite(params)
   const site = sites[0];
-  const { Settings: { ErrorDocument: errorDoc } } = site;
+  const { Settings: { ErrorDocument: errorDoc, ResponseHeaders: responseHeaders } } = site;
 
   if (['404', '403'].includes(response.status) && errorDoc) {
     const { origin: { custom : { domainName, path: originPath } } } = request;
@@ -53,7 +53,11 @@ const originResponse = async (event, context) => {
     const errorDocResponse = await httpsGet({ hostname: domainName, path });
     response.body = errorDocResponse.body;
     response.status = errorDocResponse.status;
-    response.headers = { ...response.headers, ...errorDocResponse.headers } ;
+    response.headers = { ...response.headers, ...formatHeaders(errorDocResponse.headers) } ;
+  }
+
+  if (responseHeaders) {
+    response.headers = { ...response.headers, ...formatHeaders(responseHeaders) };
   }
 
   response.headers['strict-transport-security'] = [

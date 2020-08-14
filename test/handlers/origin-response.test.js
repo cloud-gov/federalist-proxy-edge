@@ -61,7 +61,7 @@ describe('originResponse', () => {
     const response = await originResponse(event, context);
     expect(Object.keys(response.headers).length).to.equal(4);
     checkReqHeaders(response);
-    expect(response.headers['x-test']).to.deep.equal('testHeader');
+    expect(response.headers['x-test']).to.deep.equal({ key: 'x-test', value: 'testHeader'});
   });
 
   it('returns status 403 w/ errorDOc', async () => {
@@ -80,6 +80,20 @@ describe('originResponse', () => {
     const response = await originResponse(event, context);
     expect(Object.keys(response.headers).length).to.equal(4);
     checkReqHeaders(response);
-    expect(response.headers['x-test']).to.deep.equal('testHeader');
+    expect(response.headers['x-test']).to.deep.equal({ key: 'x-test', value: 'testHeader'});
+  });
+
+  it('returns the message with custom response headers', async () => {
+    const queryResults = {
+      Count: 1,
+      Items: [{ Id: 'testId', Settings: { ResponseHeaders: { header1: 'Header1', header2: 'Header2' } }, BucketName: 'testBucket' }],
+    };
+
+    stubDocDBQuery(() => queryResults);
+    const response = await originResponse(getResponseEvent(), context);
+    checkReqHeaders(response);
+    expect(Object.keys(response.headers).length).to.equal(5);
+    expect(response.headers['header1']).to.deep.equal({ key: 'header1', value: 'Header1' });
+    expect(response.headers['header2']).to.deep.equal({ key: 'header2', value: 'Header2' });
   });
 });
