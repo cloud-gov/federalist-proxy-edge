@@ -35,6 +35,6 @@ describe('httpsGet', () => {
     nock(`${url.protocol}//${url.hostname}`)
       .get(url.pathname)
       .replyWithError('didn\'t work sorry!');
-    expect(httpsGet(url)).to.eventually.be.rejected;
+    return expect(httpsGet(url)).to.eventually.be.rejected;
   });
 });
