@@ -18,9 +18,10 @@ const httpsGet = params => new Promise((resolve, reject) => {
 
 const formatHeaders = (headers) => {
   const formattedHeaders = {};
+  /* eslint-disable no-return-assign */
   Object.keys(headers)
     .forEach(key => formattedHeaders[key] = { key, value: headers[key] });
-
+  /* eslint-enable no-return-assign */
   return formattedHeaders;
 };
 
