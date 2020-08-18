@@ -45,7 +45,7 @@ const originResponse = async (event, context) => {
   const params = getSiteQueryParams(host, context.functionName);
   const sites = await querySite(params)
   const site = sites[0];
-  const { Settings: { ErrorDocument: errorDoc, ResponseHeaders: responseHeaders } } = site;
+  const { Settings: { ErrorDocument: errorDoc, ResponseHeaders: customHeaders } } = site;
 
   if (['404', '403'].includes(response.status) && errorDoc) {
     const { origin: { custom : { domainName, path: originPath } } } = request;
@@ -56,8 +56,8 @@ const originResponse = async (event, context) => {
     response.headers = { ...response.headers, ...formatHeaders(errorDocResponse.headers) } ;
   }
 
-  if (responseHeaders) {
-    response.headers = { ...response.headers, ...formatHeaders(responseHeaders) };
+  if (customHeaders) {
+    response.headers = { ...response.headers, ...formatHeaders(customHeaders) };
   }
 
   response.headers['strict-transport-security'] = [
