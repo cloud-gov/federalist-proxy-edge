@@ -36,6 +36,7 @@ jobs:
     executor: aws-serverless/default
     steps:
       - checkout
+      - run: echo 'export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/sam' >> $BASH_ENV
       - aws-serverless/install:
           aws-access-key-id: AWS_ACCESS_KEY_ID_STAGING
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY_STAGING
