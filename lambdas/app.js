@@ -1,6 +1,6 @@
 const handlerLogWrapper = require('./helpers/handlerLogWrapper');
 const {
-  getSite, parseURI, getSiteQueryParams
+  getSite, parseURI, getSiteQueryParams,
 } = require('./helpers/dynamoDBHelper');
 
 const { getHost } = require('./helpers/utils');
@@ -43,10 +43,13 @@ const originResponse = async (event) => {
   response.headers['strict-transport-security'] = [
     { key: 'Strict-Transport-Security', value: 'max-age=31536001; preload' },
   ];
-  response.headers['X-Frame-Options'] = [
+  response.headers['x-frame-options'] = [
     { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
   ];
-  response.headers['X-Server'] = [
+  response.headers['x-content-type-options'] = [
+    { key: 'X-Content-Type-Options', value: 'nosniff' },
+  ];
+  response.headers['x-server'] = [
     { key: 'X-Server', value: 'Federalist' },
   ];
   return response;
