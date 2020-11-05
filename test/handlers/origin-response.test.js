@@ -35,7 +35,7 @@ describe('originResponse', () => {
     checkReqHeaders(response);
   });
 
-  it('returns status 404 w/o errorDOc', async () => {
+  it('returns status 404 w/o errorDocument', async () => {
     const queryResults = {
       Count: 1,
       Items: [{ Id: 'testId', Settings: {}, BucketName: 'testBucket' }],
@@ -48,7 +48,7 @@ describe('originResponse', () => {
     checkReqHeaders(response);
   });
 
-  it('returns status 404 w/ errorDOc', async () => {
+  it('returns status 404 w/ errorDocument', async () => {
     const queryResults = {
       Count: 1,
       Items: [{ Id: 'testId', Settings: { ErrorDocument: '/404.html' }, BucketName: 'testBucket' }],
@@ -70,7 +70,7 @@ describe('originResponse', () => {
   it('returns status 403 w/ errorDOc', async () => {
     const queryResults = {
       Count: 1,
-      Items: [{ Id: 'testId', Settings: { ErrorDocument: '/404.html' }, BucketName: 'testBucket' }],
+      Items: [{ Id: 'testId', Settings: { ErrorDocument: '/index.html' }, BucketName: 'testBucket' }],
     };
 
     stubDocDBQuery(() => queryResults);
@@ -78,7 +78,7 @@ describe('originResponse', () => {
     event.Records[0].cf.response.status = '403';
     const { origin } = event.Records[0].cf.request;
     nock(`https://${origin.custom.domainName}`)
-      .get('/404.html')
+      .get('/index.html')
       .reply(200, 'helloworld', { 'x-test': 'testHeader' });
     const response = await originResponse(event, context);
     expect(Object.keys(response.headers).length).to.equal(5);
