@@ -7,13 +7,16 @@ const { originResponse } = require('../../lambdas/app');
 
 const context = getContext('origin-response');
 
+const strictTransportSecurity = [{ key: 'Strict-Transport-Security', value: 'max-age=31536001; preload' }];
+const xFrameOptions = [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }];
+const xContentTypeOptions = [{ key: 'X-Content-Type-Options', value: 'nosniff' }];
+const xServer = [{ key: 'X-Server', value: 'Federalist' }];
+
 const checkReqHeaders = (response) => {
-  const strictTransportSecurity = [{ key: 'Strict-Transport-Security', value: 'max-age=31536001; preload' }];
-  const xFrameOptions = [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }];
-  const xServer = [{ key: 'X-Server', value: 'Federalist' }];
   expect(response.headers['strict-transport-security']).to.deep.equal(strictTransportSecurity);
-  expect(response.headers['X-Frame-Options']).to.deep.equal(xFrameOptions);
-  expect(response.headers['X-Server']).to.deep.equal(xServer);
+  expect(response.headers['x-frame-options']).to.deep.equal(xFrameOptions);
+  expect(response.headers['x-content-type-options']).to.deep.equal(xContentTypeOptions);
+  expect(response.headers['x-server']).to.deep.equal(xServer);
 };
 
 describe('originResponse', () => {
@@ -57,9 +60,9 @@ describe('originResponse', () => {
     const { origin } = event.Records[0].cf.request;
     nock(`https://${origin.custom.domainName}`)
       .get('/404.html')
-      .reply(200, 'helloworld', { 'X-test': 'testHeader' });
+      .reply(200, 'helloworld', { 'x-test': 'testHeader' });
     const response = await originResponse(event, context);
-    expect(Object.keys(response.headers).length).to.equal(4);
+    expect(Object.keys(response.headers).length).to.equal(5);
     checkReqHeaders(response);
     expect(response.headers['x-test']).to.deep.equal({ key: 'x-test', value: 'testHeader' });
   });
@@ -76,9 +79,9 @@ describe('originResponse', () => {
     const { origin } = event.Records[0].cf.request;
     nock(`https://${origin.custom.domainName}`)
       .get('/404.html')
-      .reply(200, 'helloworld', { 'X-test': 'testHeader' });
+      .reply(200, 'helloworld', { 'x-test': 'testHeader' });
     const response = await originResponse(event, context);
-    expect(Object.keys(response.headers).length).to.equal(4);
+    expect(Object.keys(response.headers).length).to.equal(5);
     checkReqHeaders(response);
     expect(response.headers['x-test']).to.deep.equal({ key: 'x-test', value: 'testHeader' });
   });
@@ -92,7 +95,7 @@ describe('originResponse', () => {
     stubDocDBQuery(() => queryResults);
     const response = await originResponse(getResponseEvent(), context);
     checkReqHeaders(response);
-    expect(Object.keys(response.headers).length).to.equal(5);
+    expect(Object.keys(response.headers).length).to.equal(6);
     expect(response.headers.header1).to.deep.equal({ key: 'header1', value: 'Header1' });
     expect(response.headers.header2).to.deep.equal({ key: 'header2', value: 'Header2' });
   });

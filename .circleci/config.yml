@@ -40,13 +40,24 @@ jobs:
           aws-access-key-id: AWS_ACCESS_KEY_ID_STAGING
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY_STAGING
       - run:
+          name: actually install aws-sam-cli
+          when: on_fail
+          command: brew install aws-sam-cli
+      - run:
+          name: SAM it all
+          when: on_fail
+          command: |
+            sam build --parameter-overrides StackEnv=staging
+            sam validate
+            sam deploy --parameter-overrides StackEnv=staging --stack-name=federalist-proxy-staging --no-confirm-changeset --no-fail-on-empty-changeset
+      - run:
           name: sam build staging
           command: sam build --parameter-overrides StackEnv=staging
       - run:
           name: sam validate staging template
           command: sam validate
       - run:
-          name: "sam deploy staging"
+          name: sam deploy staging
           command: sam deploy --parameter-overrides StackEnv=staging --stack-name=federalist-proxy-staging --no-confirm-changeset --no-fail-on-empty-changeset
 orbs:
   aws-serverless: circleci/aws-serverless@1.0.2
