@@ -1,6 +1,6 @@
 const handlerLogWrapper = require('./helpers/handlerLogWrapper');
 const {
-  getSite, parseURI, getSiteQueryParams,
+  getSiteItem, parseURI, getSiteQueryParams, getBuildQueryParams, getSitePath
 } = require('./helpers/dynamoDBHelper');
 
 const { getHost } = require('./helpers/utils');
@@ -12,9 +12,8 @@ const originRequest = async (event, context) => {
     * Reads query string to check if S3 origin should be used, and
     * if true, sets S3 origin properties.
     */
-  const host = getHost(request);
-  const params = getSiteQueryParams(host, context.functionName);
-  return getSite(params)
+  const params = getSiteQueryParams(getHost(request), context.functionName);
+  return getSiteItem(params)
     .then((site) => {
       const { BucketName: bucket } = site;
 
@@ -39,7 +38,23 @@ const originRequest = async (event, context) => {
 };
 
 const originResponse = async (event) => {
-  const { response } = event.Records[0].cf;
+  const { request, response } = event.Records[0].cf;
+  
+  if (['404', '403'].includes(response.status)) {
+    const host = getHost(request);
+    const sitePath = getSitePath(request);
+    const params = getBuildQueryParams(host, path, context.functionName);
+    const build = await getSiteItem(params);
+    const { Settings: { SPA: spa } } = build;
+    if (spa) {
+      const errorDocPath = [sitePath, 'index.html'].join('/');
+      const errorDocResponse = await httpsGet({ hostname: host, errorDocPath });
+      response.body = errorDocResponse.body;
+      response.status = errorDocResponse.status;
+      response.headers = { ...response.headers, ...errorDocResponse.headers } ;
+    }
+  }
+
   response.headers['strict-transport-security'] = [
     { key: 'Strict-Transport-Security', value: 'max-age=31536001; preload' },
   ];
@@ -66,9 +81,8 @@ const viewerRequest = async (event, context) => {
     return request;
   }
 
-  const host = getHost(request);
-  const params = getSiteQueryParams(host, context.functionName);
-  return getSite(params)
+  const params = getSiteQueryParams(getHost(request), context.functionName);
+  return getSiteItem(params)
     .then((site) => {
       const { Settings: { BasicAuth: credentials } } = site;
 

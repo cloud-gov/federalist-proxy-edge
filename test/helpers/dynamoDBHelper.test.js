@@ -2,10 +2,10 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSite, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
+  getSiteItem, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
-describe('getSite', () => {
+describe('getSiteItem', () => {
   afterEach(() => {
     sinon.restore();
   });
@@ -19,7 +19,7 @@ describe('getSite', () => {
 
     stubDocDBQuery(() => results);
 
-    const response = await getSite(params);
+    const response = await getSiteItem(params);
     expect(response).to.deep.equal({ Settings: { BucketName: 'testBucket' } });
   });
 
@@ -30,7 +30,7 @@ describe('getSite', () => {
 
     stubDocDBQuery(() => results);
 
-    const response = await getSite(params);
+    const response = await getSiteItem(params);
     expect(response).to.eq(undefined);
   });
 
@@ -39,7 +39,7 @@ describe('getSite', () => {
 
     stubDocDBQuery(() => { throw new Error('test error'); });
 
-    const err = await getSite(params).catch(e => e);
+    const err = await getSiteItem(params).catch(e => e);
 
     expect(err).to.be.a('error');
   });
@@ -149,7 +149,7 @@ describe('getAppConfig', () => {
     expect(getAppConfig(context.functionName)).to.deep.equal({
       domain: 'sites-test.federalist.18f.gov',
       tableName: 'federalist-proxy-test',
-      siteKey: 'Id',
+      tableKey: 'Id',
     });
   });
 
@@ -158,7 +158,7 @@ describe('getAppConfig', () => {
     expect(getAppConfig(context.functionName.replace('test', 'staging'))).to.deep.equal({
       domain: 'sites-staging.federalist.18f.gov',
       tableName: 'federalist-proxy-staging',
-      siteKey: 'Id',
+      tableKey: 'Id',
     });
   });
 
@@ -167,7 +167,7 @@ describe('getAppConfig', () => {
     expect(getAppConfig(context.functionName.replace('test', 'prod'))).to.deep.equal({
       domain: 'sites-prod.federalist.18f.gov',
       tableName: 'federalist-proxy-prod',
-      siteKey: 'Id',
+      tableKey: 'Id',
     });
   });
 
