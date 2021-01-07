@@ -3,7 +3,7 @@ const {
   getSiteItem, parseURI, getSiteQueryParams, getBuildQueryParams, getSitePath
 } = require('./helpers/dynamoDBHelper');
 
-const { getHost } = require('./helpers/utils');
+const Utils = require('./helpers/utils');
 
 const originRequest = async (event, context) => {
   const { request } = event.Records[0].cf;
@@ -12,7 +12,7 @@ const originRequest = async (event, context) => {
     * Reads query string to check if S3 origin should be used, and
     * if true, sets S3 origin properties.
     */
-  const params = getSiteQueryParams(getHost(request), context.functionName);
+  const params = getSiteQueryParams(Utils.getHost(request), context.functionName);
   return getSiteItem(params)
     .then((site) => {
       const { BucketName: bucket } = site;
@@ -37,21 +37,20 @@ const originRequest = async (event, context) => {
     });
 };
 
-const originResponse = async (event) => {
-  const { request, response } = event.Records[0].cf;
-  
+const originResponse = async (event, context) => {
+  const { request, response } = event.Records[0].cf; 
   if (['404', '403'].includes(response.status)) {
-    const host = getHost(request);
+    const host = Utils.getHost(request);
     const sitePath = getSitePath(request);
-    const params = getBuildQueryParams(host, path, context.functionName);
+    const params = getBuildQueryParams(host, sitePath, context.functionName);
     const build = await getSiteItem(params);
-    const { Settings: { SPA: spa } } = build;
+    const { Settings: { spa } } = build;
     if (spa) {
       const errorDocPath = [sitePath, 'index.html'].join('/');
-      const errorDocResponse = await httpsGet({ hostname: host, errorDocPath });
+      const errorDocResponse = await Utils.httpsGet({ hostname: host, errorDocPath });
       response.body = errorDocResponse.body;
       response.status = errorDocResponse.status;
-      response.headers = { ...response.headers, ...errorDocResponse.headers } ;
+      response.headers = { ...response.headers, ...Utils.formatHeaders(errorDocResponse.headers) } ;
     }
   }
 
@@ -81,7 +80,7 @@ const viewerRequest = async (event, context) => {
     return request;
   }
 
-  const params = getSiteQueryParams(getHost(request), context.functionName);
+  const params = getSiteQueryParams(Utils.getHost(request), context.functionName);
   return getSiteItem(params)
     .then((site) => {
       const { Settings: { BasicAuth: credentials } } = site;

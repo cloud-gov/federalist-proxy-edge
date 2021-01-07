@@ -2,7 +2,8 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { stubDocDBQuery, getContext } = require('../support');
 const {
-  getSiteItem, getSiteQueryParams, parseURI, stripSiteIdFromHost, getAppConfig, functionNameRE,
+  getSiteItem, getSiteQueryParams, getBuildQueryParams, parseURI,
+  stripSiteIdFromHost, getAppConfig, functionNameRE,
 } = require('../../lambdas/helpers/dynamoDBHelper');
 
 describe('getSiteItem', () => {
@@ -102,6 +103,21 @@ describe('getSiteQueryParams', () => {
     const context = getContext('viewer-request');
     const host = 'the.site.key.sites-test.federalist.18f.gov';
     expect(getSiteQueryParams(host, context.functionName)).to.deep.equal(expectedParams);
+  });
+});
+
+describe('getBuildQueryParams', () => {
+  it('returns params', () => {
+    const expectedParams = {
+      TableName: 'federalist-proxy-test',
+      Key: {
+        Id: 'the.site.key.sites-test.federalist.18f.gov/the/test/path',
+      },
+    };
+    const context = getContext('viewer-request');
+    const host = 'the.site.key.sites-test.federalist.18f.gov';
+    const path = '/the/test/path';
+    expect(getBuildQueryParams(host, path, context.functionName)).to.deep.equal(expectedParams);
   });
 });
 
