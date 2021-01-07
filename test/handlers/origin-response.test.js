@@ -8,7 +8,6 @@ const Utils = require('../../lambdas/helpers/utils');
 describe('originResponse', () => {
   let results;
   beforeEach(() => {
-    sinon.stub(Utils, 'httpsGet').resolves({ status: 200, body: 'Hello World', headers: { 'test-header': 'testHeader' } });
     stubDocDBQuery(() => results);
   });
 
@@ -18,7 +17,9 @@ describe('originResponse', () => {
   });
 
   context('non-SPA', () => {
-    results = { Item: { Settings: {} } };
+    beforeEach(() => {
+      results = { Item: { Settings: {} } };
+    });
     it('returns the message', async () => {
       const strictTransportSecurity = [{ key: 'Strict-Transport-Security', value: 'max-age=31536001; preload' }];
       const xFrameOptions = [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }];
@@ -44,19 +45,19 @@ describe('originResponse', () => {
       const originResponseIn = getResponseEvent();
       originResponseIn.Records[0].cf.response.status = '404';
       const response = await originResponse(originResponseIn, getContext('origin-response'));
-
-      expect(Object.keys(response.headers).length).to.equal(5);
+      expect(Object.keys(response.headers).length).to.equal(4);
       expect(response.headers['strict-transport-security']).to.deep.equal(strictTransportSecurity);
       expect(response.headers['x-frame-options']).to.deep.equal(xFrameOptions);
       expect(response.headers['x-content-type-options']).to.deep.equal(xContentTypeOptions);
       expect(response.headers['x-server']).to.deep.equal(xServer);
-      expect(response.headers['test-header']).to.deep.equal(testHeader);
-      expect(response.body).to.equal('Hello World');
     });
   });
 
   context('spa routing', () => {
-    results = { Item: { Settings: { spa: true } } };
+    beforeEach(() => {
+      sinon.stub(Utils, 'httpsGet').resolves({ status: 200, body: 'Hello World', headers: { 'test-header': 'testHeader' } });
+      results = { Item: { Settings: { spa: true } } };
+    });
     it('returns a 404', async () => {
       const strictTransportSecurity = [{ key: 'Strict-Transport-Security', value: 'max-age=31536001; preload' }];
       const xFrameOptions = [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }];
