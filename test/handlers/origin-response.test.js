@@ -40,7 +40,6 @@ describe('originResponse', () => {
       const xFrameOptions = [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }];
       const xContentTypeOptions = [{ key: 'X-Content-Type-Options', value: 'nosniff' }];
       const xServer = [{ key: 'X-Server', value: 'Federalist' }];
-      const testHeader = [{ key: 'test-header', value: 'testHeader' }];
 
       const originResponseIn = getResponseEvent();
       originResponseIn.Records[0].cf.response.status = '404';
