@@ -9,7 +9,7 @@ module.exports = function handlerLogWrapper(name, fn) {
         log(`${name} (out):\t${JSON.stringify(value)}\n`);
         return value;
       })
-      .catch((error) => {    
+      .catch((error) => {
         log(`${name} (error):\t${error}\n`);
         throw error;
       });

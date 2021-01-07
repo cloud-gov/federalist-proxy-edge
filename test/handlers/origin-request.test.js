@@ -9,8 +9,8 @@ describe('originRequest', () => {
   let event;
 
   beforeEach(() => {
-    event =  getRequestEvent();
-  })
+    event = getRequestEvent();
+  });
   afterEach(() => {
     sinon.restore();
   });

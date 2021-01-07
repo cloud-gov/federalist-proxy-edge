@@ -7,12 +7,7 @@ const { getHost, httpsGet } = require('../../lambdas/helpers/utils');
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-describe  ('utils', () => {
-  let event;
-
-  beforeEach(() => {
-    event =  getRequestEvent();
-  })
+describe('utils', () => {
   afterEach(() => {
     nock.cleanAll();
   });
