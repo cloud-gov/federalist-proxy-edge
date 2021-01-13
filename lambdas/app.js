@@ -13,28 +13,27 @@ const originRequest = async (event, context) => {
     * if true, sets S3 origin properties.
     */
   const params = getSiteQueryParams(Utils.getHost(request), context.functionName);
-  return getSiteItem(params)
-    .then((site) => {
-      const { BucketName: bucket } = site;
+  const site = await getSiteItem(params);
+    
+  const { BucketName: bucket } = site;
 
-      if (bucket) {
-        const s3DomainName = `${bucket}.app.cloud.gov`;
+  if (bucket) {
+    const s3DomainName = `${bucket}.app.cloud.gov`;
 
-        request.origin = {
-          custom: {
-            domainName: s3DomainName,
-            port: 443,
-            protocol: 'https',
-            sslProtocols: ['TLSv1', 'TLSv1.1'],
-            readTimeout: 5,
-            keepaliveTimeout: 5,
-            customHeaders: {},
-          },
-        };
-        request.headers.host = [{ key: 'host', value: s3DomainName }];
-      }
-      return request;
-    });
+    request.origin = {
+      custom: {
+        domainName: s3DomainName,
+        port: 443,
+        protocol: 'https',
+        sslProtocols: ['TLSv1', 'TLSv1.1'],
+        readTimeout: 5,
+        keepaliveTimeout: 5,
+        customHeaders: {},
+      },
+    };
+    request.headers.host = [{ key: 'host', value: s3DomainName }];
+  }
+  return request;
 };
 
 const originResponse = async (event, context) => {
@@ -45,7 +44,7 @@ const originResponse = async (event, context) => {
     const params = getBuildQueryParams(host, sitePath, context.functionName);
     const build = await getSiteItem(params);
     const { Settings: { spa } } = build;
-    if (spa) {
+    if ([true, 'true', 'True'].includes(spa)) {
       const errorDocPath = [sitePath, 'index.html'].join('/');
       const errorDocResponse = await Utils.httpsGet({ hostname: host, errorDocPath });
       response.body = errorDocResponse.body;

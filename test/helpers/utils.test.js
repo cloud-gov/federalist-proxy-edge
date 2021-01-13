@@ -1,10 +1,8 @@
 const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const { getRequestEvent } = require('../support');
 const { getHost, httpsGet } = require('../../lambdas/helpers/utils');
 
-chai.use(chaiAsPromised);
 const { expect } = chai;
 
 describe('utils', () => {
@@ -25,18 +23,23 @@ describe('utils', () => {
       nock(`${url.protocol}//${url.hostname}`)
         .get(url.pathname)
         .reply(200, 'Hello World', { 'test-header': 'testHeader' });
-      expect(httpsGet(url)).to.eventually.deep.equal({
+
+      const resp = await httpsGet(url);
+      expect(resp).to.deep.equal({
         status: 200, body: 'Hello World', headers: { 'test-header': 'testHeader' },
       });
     });
 
     it('promisify https.get - reject', async () => {
+      const errMsg = 'didn\'t work sorry!';
       const endpoint = 'https://example.gov/index.html';
       const url = new URL(endpoint);
       nock(`${url.protocol}//${url.hostname}`)
         .get(url.pathname)
-        .replyWithError('didn\'t work sorry!');
-      return expect(httpsGet(url)).to.eventually.be.rejected;
+        .replyWithError(errMsg);
+
+      await httpsGet(url)
+        .catch(err => expect(err.message).to.equal(errMsg));
     });
   });
 });
